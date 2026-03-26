@@ -15,13 +15,13 @@ export class BlogComponent {
       date: 'Oct 12, 2026',
       title: 'The Story Behind Himalayan Flavors',
       excerpt: 'Discover the rich history and cultural significance of the spices that define our unique menu offerings.',
-      image: 'assets/368bc588-c966-4d7d-8001-d57a90faa70d_3840w.jpg'
+      image: 'assets/cooking-fire.jpg'
     },
     {
       date: 'Oct 05, 2026',
       title: '5 Must-Try Dishes at Naar & Noor',
       excerpt: 'A curated guide to navigating our menu, from classic Momos to our signature flame-grilled platters.',
-      image: 'assets/6527c082-4110-43ea-9d91-0bf6f431ffb9_3840w.jpg'
+      image: 'assets/grilled-food.jpg'
     },
     {
       date: 'Sep 28, 2026',

@@ -14,13 +14,13 @@ export class ChefsComponent {
     {
       name: 'Arjun Rai',
       role: 'Head Chef',
-      image: 'assets/Arjun.webp',
+      image: 'assets/chef-arjun.webp',
       bio: 'With over 20 years mastering fire-based cooking techniques in Kathmandu, Chef Arjun brings an uncompromising standard for authentic flavor and presentation to every plate.'
     },
     {
       name: 'Maya Sherpa',
       role: 'Sous Chef',
-      image: 'assets/6527c082-4110-43ea-9d91-0bf6f431ffb9_3840w.jpg',
+      image: 'assets/grilled-food.jpg',
       bio: 'A specialist in Himalayan spices and marinades, Maya\'s delicate touch balances the intense heat of the grill with subtle, fragrant undertones that define our signature dishes.'
     }
   ];

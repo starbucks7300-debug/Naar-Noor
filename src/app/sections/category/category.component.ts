@@ -12,11 +12,11 @@ export class CategoryComponent {
   categories = [
     {
       title: 'Starters',
-      image: 'assets/368bc588-c966-4d7d-8001-d57a90faa70d_3840w.jpg'
+      image: 'assets/cooking-fire.jpg'
     },
     {
       title: 'Grill & BBQ',
-      image: 'assets/6527c082-4110-43ea-9d91-0bf6f431ffb9_3840w.jpg'
+      image: 'assets/grilled-food.jpg'
     },
     {
       title: 'Himalayan Mains',
@@ -24,7 +24,7 @@ export class CategoryComponent {
     },
     {
       title: 'Cocktails',
-      image: 'assets/368bc588-c966-4d7d-8001-d57a90faa70d_3840w.jpg'
+      image: 'assets/cooking-fire.jpg'
     }
   ];
 }
