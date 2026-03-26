@@ -1,0 +1,100 @@
+# Automatic PR labeling configuration
+
+# Documentation
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'docs/**/*'
+      - '**/*.md'
+      - '.github/scripts/README.md'
+
+# Source code
+source:
+  - changed-files:
+    - any-glob-to-any-file: 'src/**/*'
+
+# Components
+components:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'src/app/components/**/*'
+      - 'src/app/sections/**/*'
+
+# Styles
+styles:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.css'
+      - '**/*.scss'
+      - 'src/styles.css'
+
+# TypeScript
+typescript:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.ts'
+
+# HTML Templates
+templates:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.html'
+
+# Configuration
+configuration:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'angular.json'
+      - 'tsconfig*.json'
+      - 'package.json'
+      - 'package-lock.json'
+
+# GitHub Actions
+github-actions:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**/*'
+
+# Scripts
+scripts:
+  - changed-files:
+    - any-glob-to-any-file: '.github/scripts/**/*'
+
+# Docker
+docker:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'nginx.conf'
+
+# Dependencies
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package.json'
+      - 'package-lock.json'
+
+# Assets
+assets:
+  - changed-files:
+    - any-glob-to-any-file: 'src/assets/**/*'
+
+# Tests
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.spec.ts'
+      - '**/*.test.ts'
+
+# SEO
+seo:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/sitemap.xml'
+      - 'src/robots.txt'
+      - 'src/index.html'
+
+# Security
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/SECURITY.md'
+      - '.github/workflows/security.yml'

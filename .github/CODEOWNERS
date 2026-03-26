@@ -1,0 +1,32 @@
+# Code Owners for The Lost Yeti Kitchen & Bar
+
+# Default owners for everything in the repo
+* @yourusername
+
+# Documentation
+/docs/ @yourusername
+*.md @yourusername
+
+# GitHub workflows and configuration
+/.github/ @yourusername
+
+# Source code
+/src/ @yourusername
+
+# Angular components
+/src/app/components/ @yourusername
+/src/app/sections/ @yourusername
+
+# Configuration files
+angular.json @yourusername
+package.json @yourusername
+tsconfig*.json @yourusername
+
+# Docker and deployment
+Dockerfile @yourusername
+nginx.conf @yourusername
+.dockerignore @yourusername
+
+# Security and sensitive files
+/docs/SECURITY.md @yourusername
+/.github/workflows/security.yml @yourusername

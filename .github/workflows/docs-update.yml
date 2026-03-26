@@ -1,0 +1,237 @@
+name: Auto Update Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'angular.json'
+      - 'tsconfig.json'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'package.json'
+
+jobs:
+  update-structure-docs:
+    name: Update Structure Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate file tree
+        id: file-tree
+        run: |
+          echo "Generating project structure..."
+          tree -I 'node_modules|.angular|dist' -L 4 --dirsfirst > /tmp/tree-output.txt || true
+          
+      - name: Update STRUCTURE.md
+        run: |
+          node .github/scripts/update-structure.js
+      
+      - name: Count components
+        id: count-components
+        run: |
+          COMPONENTS=$(find src/app/components -name "*.component.ts" | wc -l)
+          SECTIONS=$(find src/app/sections -name "*.component.ts" | wc -l)
+          echo "components=$COMPONENTS" >> $GITHUB_OUTPUT
+          echo "sections=$SECTIONS" >> $GITHUB_OUTPUT
+      
+      - name: Update FEATURES.md with component count
+        run: |
+          node .github/scripts/update-features.js ${{ steps.count-components.outputs.components }} ${{ steps.count-components.outputs.sections }}
+      
+      - name: Commit documentation changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: auto-update structure and features documentation [skip ci]"
+          file_pattern: "docs/STRUCTURE.md docs/FEATURES.md"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+  update-changelog:
+    name: Update Changelog
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Get commit messages
+        id: commits
+        run: |
+          COMMITS=$(git log --pretty=format:"- %s (%h)" -10 --no-merges)
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Get changed files
+        id: changed-files
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | head -20)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Update CHANGELOG.md
+        run: |
+          node .github/scripts/update-changelog.js
+        env:
+          COMMITS: ${{ steps.commits.outputs.commits }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+      
+      - name: Commit changelog
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: auto-update changelog [skip ci]"
+          file_pattern: "docs/CHANGELOG.md"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+  update-dependencies-docs:
+    name: Update Dependencies Documentation
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'package.json') || contains(github.event.head_commit.message, 'dependencies')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate dependency list
+        run: |
+          npm list --depth=0 --json > /tmp/dependencies.json
+      
+      - name: Update TECHNOLOGIES.md
+        run: |
+          node .github/scripts/update-technologies.js
+      
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: auto-update dependencies documentation [skip ci]"
+          file_pattern: "docs/TECHNOLOGIES.md"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+  update-readme:
+    name: Update README
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Get project stats
+        id: stats
+        run: |
+          TOTAL_FILES=$(find src -type f | wc -l)
+          TS_FILES=$(find src -name "*.ts" | wc -l)
+          HTML_FILES=$(find src -name "*.html" | wc -l)
+          CSS_FILES=$(find src -name "*.css" | wc -l)
+          COMPONENTS=$(find src/app -name "*.component.ts" | wc -l)
+          
+          echo "total_files=$TOTAL_FILES" >> $GITHUB_OUTPUT
+          echo "ts_files=$TS_FILES" >> $GITHUB_OUTPUT
+          echo "html_files=$HTML_FILES" >> $GITHUB_OUTPUT
+          echo "css_files=$CSS_FILES" >> $GITHUB_OUTPUT
+          echo "components=$COMPONENTS" >> $GITHUB_OUTPUT
+      
+      - name: Update README badges
+        run: |
+          node .github/scripts/update-readme.js
+        env:
+          TOTAL_FILES: ${{ steps.stats.outputs.total_files }}
+          TS_FILES: ${{ steps.stats.outputs.ts_files }}
+          HTML_FILES: ${{ steps.stats.outputs.html_files }}
+          CSS_FILES: ${{ steps.stats.outputs.css_files }}
+          COMPONENTS: ${{ steps.stats.outputs.components }}
+      
+      - name: Commit README
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: auto-update README with latest stats [skip ci]"
+          file_pattern: "README.md"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+
+  generate-api-docs:
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install Compodoc
+        run: npm install -g @compodoc/compodoc
+      
+      - name: Generate documentation
+        run: |
+          compodoc -p tsconfig.json -d docs/api --theme material --hideGenerator
+      
+      - name: Commit API docs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: auto-generate API documentation [skip ci]"
+          file_pattern: "docs/api/**"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"

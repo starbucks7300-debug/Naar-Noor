@@ -1,0 +1,235 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  prettier:
+    name: Prettier Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run Prettier
+        run: npx prettier --check "src/**/*.{ts,html,css,json}"
+        continue-on-error: true
+
+  eslint:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npm run lint --if-present
+        continue-on-error: true
+
+  typescript:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: TypeScript compilation check
+        run: npx tsc --noEmit
+
+  bundle-size:
+    name: Bundle Size Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build:prod
+      
+      - name: Check bundle size
+        run: |
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          
+          cd dist/lost-yeti
+          for file in *.js; do
+            if [ -f "$file" ]; then
+              size=$(du -h "$file" | cut -f1)
+              echo "| $file | $size |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+      
+      - name: Upload bundle analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: bundle-analysis
+          path: dist/lost-yeti/*.js
+
+  accessibility:
+    name: Accessibility Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build:prod
+      
+      - name: Run accessibility tests
+        run: |
+          npx @axe-core/cli dist/lost-yeti/index.html --exit
+        continue-on-error: true
+
+  html-validate:
+    name: HTML Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Validate HTML templates
+        run: |
+          npx html-validate "src/**/*.html"
+        continue-on-error: true
+
+  css-lint:
+    name: CSS Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Lint CSS files
+        run: |
+          npx stylelint "src/**/*.css"
+        continue-on-error: true
+
+  complexity:
+    name: Code Complexity Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Analyze complexity
+        run: |
+          npx complexity-report src/app --format json > complexity-report.json
+        continue-on-error: true
+      
+      - name: Upload complexity report
+        uses: actions/upload-artifact@v3
+        with:
+          name: complexity-report
+          path: complexity-report.json
+        if: always()
+
+  comment-pr:
+    name: Comment on PR
+    runs-on: ubuntu-latest
+    needs: [prettier, eslint, typescript, bundle-size, accessibility]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Create PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              prettier: '${{ needs.prettier.result }}',
+              eslint: '${{ needs.eslint.result }}',
+              typescript: '${{ needs.typescript.result }}',
+              bundleSize: '${{ needs.bundle-size.result }}',
+              accessibility: '${{ needs.accessibility.result }}'
+            };
+            
+            const statusEmoji = (status) => {
+              return status === 'success' ? '✅' : status === 'failure' ? '❌' : '⚠️';
+            };
+            
+            const comment = `## Code Quality Report
+            
+            | Check | Status |
+            |-------|--------|
+            | Prettier | ${statusEmoji(results.prettier)} ${results.prettier} |
+            | ESLint | ${statusEmoji(results.eslint)} ${results.eslint} |
+            | TypeScript | ${statusEmoji(results.typescript)} ${results.typescript} |
+            | Bundle Size | ${statusEmoji(results.bundleSize)} ${results.bundleSize} |
+            | Accessibility | ${statusEmoji(results.accessibility)} ${results.accessibility} |
+            
+            ${Object.values(results).every(r => r === 'success') ? '🎉 All checks passed!' : '⚠️ Some checks need attention'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
