@@ -496,3 +496,13 @@ For more details, see:
 - [FEATURES.md](./FEATURES.md) - Feature documentation
 - [TECHNOLOGIES.md](./TECHNOLOGIES.md) - Technology stack
 - [STYLES.md](./STYLES.md) - Styling guidelines
+
+
+## Project Statistics
+
+Last updated: 2026-03-28
+
+- Total Components: 17
+- TypeScript Files: 26
+- HTML Templates: 17
+- CSS Stylesheets: 17

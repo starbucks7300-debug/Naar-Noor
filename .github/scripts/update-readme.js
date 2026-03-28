@@ -7,8 +7,29 @@ const path = require('path');
  * Auto-update README.md with project statistics
  */
 
+function countFiles(dir, extension = null) {
+  let count = 0;
+  if (!fs.existsSync(dir)) return count;
+  const items = fs.readdirSync(dir, { withFileTypes: true });
+  
+  items.forEach(item => {
+    const fullPath = path.join(dir, item.name);
+    if (item.isDirectory() && !['node_modules', '.angular', 'dist', '.git'].includes(item.name)) {
+      count += countFiles(fullPath, extension);
+    } else if (item.isFile()) {
+      if (!extension || item.name.endsWith(extension)) {
+        count++;
+      }
+    }
+  });
+  
+  return count;
+}
+
 function updateReadme() {
   const readmePath = path.join(process.cwd(), 'README.md');
+  const srcPath = path.join(process.cwd(), 'src');
+  const appPath = path.join(srcPath, 'app');
   
   if (!fs.existsSync(readmePath)) {
     console.log('README.md not found, skipping...');
@@ -17,13 +38,13 @@ function updateReadme() {
   
   let content = fs.readFileSync(readmePath, 'utf8');
   
-  // Get stats from environment
+  // Get stats by counting files
   const stats = {
-    totalFiles: process.env.TOTAL_FILES || '0',
-    tsFiles: process.env.TS_FILES || '0',
-    htmlFiles: process.env.HTML_FILES || '0',
-    cssFiles: process.env.CSS_FILES || '0',
-    components: process.env.COMPONENTS || '0'
+    totalFiles: countFiles(process.cwd()).toString(),
+    tsFiles: countFiles(srcPath, '.ts').toString(),
+    htmlFiles: countFiles(srcPath, '.html').toString(),
+    cssFiles: countFiles(srcPath, '.css').toString(),
+    components: countFiles(appPath, '.component.ts').toString()
   };
   
   const timestamp = new Date().toISOString().split('T')[0];

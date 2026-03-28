@@ -496,3 +496,110 @@ interface MenuItem {
 ---
 
 For implementation details, see [STRUCTURE.md](./STRUCTURE.md) and [TECHNOLOGIES.md](./TECHNOLOGIES.md).
+
+
+## Component Inventory
+
+Last updated: 2026-03-28
+
+Total Components: 17
+
+### Components List
+
+#### AppComponent
+
+- **Selector**: `app-root`
+- **Location**: `\src\app\app.component.ts`
+
+#### AnimatedBackgroundComponent
+
+- **Selector**: `app-animated-background`
+- **Location**: `\src\app\components\animated-background\animated-background.component.ts`
+- **Inputs**:
+  - `zIndex: string = '-z-50'`
+
+#### CustomCalendarComponent
+
+- **Selector**: `app-custom-calendar`
+- **Location**: `\src\app\components\custom-calendar\custom-calendar.component.ts`
+- **Inputs**:
+  - `selectedDate: Date | null = null`
+- **Outputs**:
+  - `dateSelected: EventEmitter<Date>`
+
+#### CustomDropdownComponent
+
+- **Selector**: `app-custom-dropdown`
+- **Location**: `\src\app\components\custom-dropdown\custom-dropdown.component.ts`
+- **Inputs**:
+  - `options: string[] = []`
+  - `selectedValue: string = ''`
+  - `placeholder: string = 'Select option'`
+  - `icon: string = 'solar:alt-arrow-down-linear'`
+- **Outputs**:
+  - `valueSelected: EventEmitter<string>`
+
+#### FooterComponent
+
+- **Selector**: `app-footer`
+- **Location**: `\src\app\components\footer\footer.component.ts`
+
+#### HeaderComponent
+
+- **Selector**: `app-header`
+- **Location**: `\src\app\components\header\header.component.ts`
+
+#### HomeComponent
+
+- **Selector**: `app-home`
+- **Location**: `\src\app\pages\home\home.component.ts`
+
+#### AboutComponent
+
+- **Selector**: `app-about`
+- **Location**: `\src\app\sections\about\about.component.ts`
+
+#### BlogComponent
+
+- **Selector**: `app-blog`
+- **Location**: `\src\app\sections\blog\blog.component.ts`
+
+#### CategoryComponent
+
+- **Selector**: `app-category`
+- **Location**: `\src\app\sections\category\category.component.ts`
+
+#### ChefsComponent
+
+- **Selector**: `app-chefs`
+- **Location**: `\src\app\sections\chefs\chefs.component.ts`
+
+#### CinematicBannerComponent
+
+- **Selector**: `app-cinematic-banner`
+- **Location**: `\src\app\sections\cinematic-banner\cinematic-banner.component.ts`
+
+#### HeroComponent
+
+- **Selector**: `app-hero`
+- **Location**: `\src\app\sections\hero\hero.component.ts`
+
+#### LocationsComponent
+
+- **Selector**: `app-locations`
+- **Location**: `\src\app\sections\locations\locations.component.ts`
+
+#### MenuComponent
+
+- **Selector**: `app-menu`
+- **Location**: `\src\app\sections\menu\menu.component.ts`
+
+#### ReservationComponent
+
+- **Selector**: `app-reservation`
+- **Location**: `\src\app\sections\reservation\reservation.component.ts`
+
+#### ReviewsComponent
+
+- **Selector**: `app-reviews`
+- **Location**: `\src\app\sections\reviews\reviews.component.ts`

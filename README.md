@@ -170,3 +170,15 @@ See [CONTRIBUTORS.md](./docs/CONTRIBUTORS.md) for the list of contributors.
 <div align="center">
 Made with ❤️ by Naar & Noor Team
 </div>
+
+
+
+## 📊 Project Statistics
+
+![Components](https://img.shields.io/badge/Components-17-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-26_files-blue)
+![HTML](https://img.shields.io/badge/HTML-17_files-orange)
+![CSS](https://img.shields.io/badge/CSS-17_files-purple)
+![Total Files](https://img.shields.io/badge/Total_Files-138-green)
+
+*Last updated: 2026-03-28*
