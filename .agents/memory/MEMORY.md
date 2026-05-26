@@ -1,1 +1,0 @@
-- [ASP.NET Core backend setup](aspnet-backend.md) — dotnet-ef path, Replit DB URL conversion, and workflow run script quirks
