@@ -1,41 +1,74 @@
-<section id="chefs" class="py-6 px-6">
+<section id="chefs" class="py-24 px-6 overflow-hidden">
   <div class="max-w-7xl mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+
+    <!-- Header -->
+    <div reveal [revealDelay]="0" class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
       <div>
-        <span class="text-[#C65A1E] text-xs font-medium tracking-[0.2em] uppercase mb-2 block">The Masters</span>
-        <h2 class="font-['Forum'] text-4xl md:text-5xl text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">Meet Our Chefs</h2>
+        <span class="text-[#C65A1E] text-xs font-medium tracking-[0.2em] uppercase mb-3 block">The Masters</span>
+        <h2 class="font-['Forum'] text-4xl md:text-5xl text-white tracking-tight">Meet Our Chefs</h2>
       </div>
-      <p class="text-sm text-neutral-100 max-w-md font-light leading-relaxed">
-        Bringing decades of experience from the high-altitude kitchens of Nepal to the modern culinary scene.
+      <p class="text-sm text-neutral-400 max-w-sm font-light leading-relaxed">
+        Decades of experience from the high-altitude kitchens of Nepal, brought to life on every plate.
       </p>
     </div>
 
-    <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-      <div *ngFor="let i of [1,2]" class="animate-pulse">
-        <div class="aspect-[3/4] rounded-2xl bg-white/5 mb-6"></div>
-        <div class="h-7 bg-white/10 rounded w-40 mb-2"></div>
-        <div class="h-3 bg-white/5 rounded w-24 mb-4"></div>
-        <div class="h-4 bg-white/5 rounded w-full"></div>
+    <!-- Skeleton -->
+    <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div *ngFor="let i of [1,2,3]" class="animate-pulse">
+        <div class="aspect-[3/4] rounded-2xl bg-white/5 mb-5"></div>
+        <div class="h-6 bg-white/10 rounded w-36 mb-2"></div>
+        <div class="h-3 bg-white/5 rounded w-20 mb-4"></div>
+        <div class="space-y-1.5">
+          <div class="h-3 bg-white/5 rounded w-full"></div>
+          <div class="h-3 bg-white/5 rounded w-4/5"></div>
+        </div>
       </div>
     </div>
 
-    <div *ngIf="error" class="text-center py-12 text-neutral-500 text-sm">
+    <!-- Error -->
+    <div *ngIf="error" class="text-center py-16 text-neutral-500 text-sm">
       Unable to load chef profiles right now.
     </div>
 
-    <div *ngIf="!loading && !error" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-      <div *ngFor="let chef of chefs; let i = index" class="group" [class.md:mt-16]="i === 1">
-        <div class="aspect-[3/4] rounded-2xl overflow-hidden mb-6 bg-[#111]">
+    <!-- Chefs grid -->
+    <div *ngIf="!loading && !error" class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+      <div *ngFor="let chef of chefs; let i = index"
+           reveal
+           [revealDelay]="revealDelay(i)"
+           revealFrom="bottom"
+           class="group cursor-default">
+
+        <!-- Image card -->
+        <div class="relative aspect-[3/4] rounded-2xl overflow-hidden mb-6 bg-[#111]">
           <img
             [src]="chef.image"
             [alt]="chef.name"
             loading="lazy"
-            class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
+            [style.objectPosition]="i === 0 ? 'center top' : 'center 20%'"
+            class="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105">
+
+          <!-- Dark gradient overlay -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+          <!-- Specialty badge -->
+          <div class="absolute top-4 left-4">
+            <span class="text-[10px] font-medium tracking-widest uppercase text-white/70 bg-black/40 backdrop-blur-sm border border-white/10 px-3 py-1.5 rounded-full">
+              {{ chef.specialty }}
+            </span>
+          </div>
+
+          <!-- Name overlay at bottom -->
+          <div class="absolute bottom-0 left-0 right-0 p-6">
+            <h3 class="font-['Forum'] text-2xl text-white tracking-tight leading-tight mb-0.5">{{ chef.name }}</h3>
+            <span class="text-xs text-[#C65A1E] uppercase tracking-widest font-medium">{{ chef.role }}</span>
+          </div>
         </div>
-        <h3 class="font-['Forum'] text-2xl text-white tracking-tight mb-1">{{ chef.name }}</h3>
-        <span class="text-xs text-[#C65A1E] uppercase tracking-wider font-medium block mb-3">{{ chef.role }}</span>
-        <p class="text-sm text-neutral-200 font-light leading-relaxed">{{ chef.bio }}</p>
+
+        <!-- Bio below -->
+        <p class="text-sm text-neutral-400 font-light leading-relaxed">{{ chef.bio }}</p>
+
       </div>
     </div>
+
   </div>
 </section>
