@@ -1,14 +1,15 @@
 {
-  "buildCommand": "npm ci && npm run build",
+  "version": 2,
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/lost-yeti/browser",
-  "framework": "angular",
+  "installCommand": "npm ci",
   "env": {
     "ANGULAR_CLI_ANALYTICS": "false"
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
