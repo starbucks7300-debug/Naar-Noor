@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ng serve --port 5000 --host 0.0.0.0",
-    "build": "ng build --configuration production",
+    "build": "npx ng build --configuration production",
     "serve": "node -e \"const http=require('http'),fs=require('fs'),path=require('path');const PORT=process.env.PORT||3000;const dir='dist/lost-yeti/browser';http.createServer((req,res)=>{let f=path.join(dir,req.url==='/'?'index.html':req.url);if(!fs.existsSync(f))f=path.join(dir,'index.html');res.end(fs.readFileSync(f));}).listen(PORT);\""
   },
   "dependencies": {
