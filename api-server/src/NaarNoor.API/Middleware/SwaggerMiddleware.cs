@@ -7,10 +7,13 @@ public static class SwaggerMiddleware
 {
     public static void UseSwaggerMiddleware(this WebApplication app)
     {
-        app.UseSwagger();
+        app.UseSwagger(c =>
+        {
+            c.RouteTemplate = "api/swagger/{documentName}/swagger.json";
+        });
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Naar & Noor API v1");
+            c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "Naar & Noor API v1");
             c.RoutePrefix = "api/docs";
         });
     }

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://naar-noor-api.vercel.app'
+  apiUrl: 'https://naar-noor.runasp.net'
 };

@@ -56,6 +56,8 @@ app.MapGet("/api", () => Results.Ok(new
     docs = "/api/docs",
     health = "/health"
 }));
+app.MapGet("/api/docs/index.html", () => Results.Redirect("/api/docs", permanent: false));
+app.MapGet("/api/docs/", () => Results.Redirect("/api/docs", permanent: false));
 
 // 7. Map Controllers
 app.MapControllersMiddleware();
