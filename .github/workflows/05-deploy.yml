@@ -86,9 +86,7 @@ jobs:
       - name: Restore and publish backend
         run: |
           dotnet restore api-server/NaarNoor.sln
-          dotnet publish api-server/src/NaarNoor.API/NaarNoor.API.csproj \
-            --configuration Release \
-            --output ./backend-publish
+          dotnet publish api-server/src/NaarNoor.API/NaarNoor.API.csproj --configuration Release --output ./backend-publish
 
       # Check if Azure secrets are configured
       - name: Check Azure secrets
