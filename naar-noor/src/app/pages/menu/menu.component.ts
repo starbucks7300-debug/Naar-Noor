@@ -240,10 +240,10 @@ export class MenuPageComponent implements OnInit {
 
     // Price Range
     if (this.minPrice !== null && this.minPrice !== undefined) {
-      items = items.filter(i => i.price >= this.minPrice);
+      items = items.filter(i => i.price >= this.minPrice!);
     }
     if (this.maxPrice !== null && this.maxPrice !== undefined) {
-      items = items.filter(i => i.price <= this.maxPrice);
+      items = items.filter(i => i.price <= this.maxPrice!);
     }
 
     // Sort
