@@ -2,6 +2,7 @@ using FluentAssertions;
 using NaarNoor.Application.Reservations.Commands.CreateReservation;
 using System.Net;
 using System.Text.Json;
+using NaarNoor.API.Tests.Integration.Fixtures;
 using Xunit;
 
 namespace NaarNoor.API.Tests.Integration;
@@ -169,7 +170,7 @@ public class HttpExceptionMappingPropertyTests : ApiTestBase
         // If implemented and resource doesn't exist, should return 404
         if (response.StatusCode != HttpStatusCode.NoContent)
         {
-            response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.NoContent,
+            response.StatusCode.Should().BeOneOf(new[] { HttpStatusCode.NotFound, HttpStatusCode.NoContent },
                 "Non-existent resource should return 404 or 204");
         }
     }
@@ -239,10 +240,8 @@ public class HttpExceptionMappingPropertyTests : ApiTestBase
         var content = await response.Content.ReadAsStringAsync();
         
         // Verify error response contains meaningful information
-        content.Should().Satisfy(
-            c => c.Contains("PartySize") || c.Contains("party") || c.Contains("error"),
-            "Error response should reference the problematic field or contain error information"
-        );
+        (content.Contains("PartySize") || content.Contains("party") || content.Contains("error"))
+            .Should().BeTrue("Error response should reference the problematic field or contain error information");
     }
 
     #endregion
@@ -342,8 +341,8 @@ public class HttpExceptionMappingPropertyTests : ApiTestBase
         response2.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         // All should be 400 or better (not 500)
-        response1.StatusCode.Should().BeLessThanOrEqualTo(HttpStatusCode.BadRequest);
-        response2.StatusCode.Should().BeLessThanOrEqualTo(HttpStatusCode.BadRequest);
+        ((int)response1.StatusCode).Should().BeLessThanOrEqualTo((int)HttpStatusCode.BadRequest);
+        ((int)response2.StatusCode).Should().BeLessThanOrEqualTo((int)HttpStatusCode.BadRequest);
     }
 
     #endregion

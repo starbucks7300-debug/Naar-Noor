@@ -1,9 +1,10 @@
 using FluentAssertions;
 using NaarNoor.Application.Reservations.Commands.CreateReservation;
 using NaarNoor.Application.Orders.Commands.CreateOrder;
-using NaarNoor.Application.Contact.Commands;
+using NaarNoor.Application.Contact.Commands.SubmitInquiry;
 using System.Net;
 using System.Text.Json;
+using NaarNoor.API.Tests.Integration.Fixtures;
 using Xunit;
 
 namespace NaarNoor.API.Tests.Integration;
@@ -219,9 +220,10 @@ public class InputValidationConsistencyPropertyTests : ApiTestBase
     public async Task PostContact_WithMissingEmail_ShouldReturn400WithValidationError()
     {
         // Arrange
-        var command = new SendContactInquiryCommand(
+        var command = new SubmitInquiryCommand(
             Name: "John Doe",
             Email: "",  // Missing
+            PhoneNumber: null,
             Subject: "Question",
             Message: "This is a test message about the restaurant"
         );
@@ -246,9 +248,10 @@ public class InputValidationConsistencyPropertyTests : ApiTestBase
     public async Task PostContact_WithInvalidEmailFormat_ShouldReturn400(string invalidEmail)
     {
         // Arrange
-        var command = new SendContactInquiryCommand(
+        var command = new SubmitInquiryCommand(
             Name: "John Doe",
             Email: invalidEmail,
+            PhoneNumber: null,
             Subject: "Question",
             Message: "This is a test message"
         );
@@ -287,9 +290,10 @@ public class InputValidationConsistencyPropertyTests : ApiTestBase
             SpecialRequests: null
         );
 
-        var invalidContact = new SendContactInquiryCommand(
+        var invalidContact = new SubmitInquiryCommand(
             Name: "",
             Email: "invalid-email",
+            PhoneNumber: null,
             Subject: "",
             Message: ""
         );

@@ -48,7 +48,9 @@ docker-compose.override.yml
 *.tmp
 
 # Application specific
+api-server/TestResults/
 api-server/tests/*/TestResults/
+api-server/**/TestResults/
 naar-noor/coverage/
 naar-noor/cypress/screenshots/
 naar-noor/cypress/videos/

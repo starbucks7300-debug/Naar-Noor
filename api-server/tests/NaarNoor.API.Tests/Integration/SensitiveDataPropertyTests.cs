@@ -1,6 +1,7 @@
 using FluentAssertions;
 using System.Net;
 using System.Text.Json;
+using NaarNoor.API.Tests.Integration.Fixtures;
 using Xunit;
 
 namespace NaarNoor.API.Tests.Integration;
@@ -40,17 +41,16 @@ public class SensitiveDataPropertyTests : ApiTestBase
         var content = await response.Content.ReadAsStringAsync();
 
         // Verify response doesn't contain password-related fields
-        content.Should().NotContainAny(
+        content.ToLowerInvariant().Should().NotContainAny(
             "password",
             "passwd",
             "pwd",
             "hash",
             "secret",
             "token",
-            "apiKey",
+            "apikey",
             "api_key",
-            "Bearer ",
-            StringComparison.OrdinalIgnoreCase);
+            "bearer ");
     }
 
     /// <summary>
@@ -81,13 +81,12 @@ public class SensitiveDataPropertyTests : ApiTestBase
             var content = await response.Content.ReadAsStringAsync();
             
             // Response should not contain payment info or credentials
-            content.Should().NotContainAny(
-                "creditCard",
+            content.ToLowerInvariant().Should().NotContainAny(
+                "creditcard",
                 "cvv",
                 "password",
                 "bearer",
-                "token",
-                StringComparison.OrdinalIgnoreCase);
+                "token");
         }
     }
 
@@ -119,15 +118,14 @@ public class SensitiveDataPropertyTests : ApiTestBase
         var content = await response.Content.ReadAsStringAsync();
 
         // Error message should be user-friendly, not expose internals
-        content.Should().NotContainAny(
-            "SELECT",
-            "FROM",
-            "WHERE",
+        content.ToLowerInvariant().Should().NotContainAny(
+            "select",
+            "from",
+            "where",
             ".cs:",          // C# file paths
-            "at System.",    // Stack traces
-            "ConnectionString",
-            "server=",
-            StringComparison.OrdinalIgnoreCase);
+            "at system.",    // Stack traces
+            "connectionstring",
+            "server=");
     }
 
     /// <summary>
@@ -327,13 +325,12 @@ public class SensitiveDataPropertyTests : ApiTestBase
             var content = await response.Content.ReadAsStringAsync();
 
             // Verify sensitive fields are not exposed
-            content.Should().NotContainAny(
-                "paymentMethod",
-                "cardNumber",
-                "cardCvv",
-                "accountNumber",
-                "bankCode",
-                StringComparison.OrdinalIgnoreCase);
+            content.ToLowerInvariant().Should().NotContainAny(
+                "paymentmethod",
+                "cardnumber",
+                "cardcvv",
+                "accountnumber",
+                "bankcode");
         }
         else if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
@@ -362,12 +359,11 @@ public class SensitiveDataPropertyTests : ApiTestBase
             var content = await response.Content.ReadAsStringAsync();
 
             // Internal IDs like database IDs, server names should not be visible
-            content.Should().NotContainAny(
-                "databaseId",
-                "internalId",
-                "serverId",
-                "dbConnId",
-                StringComparison.OrdinalIgnoreCase);
+            content.ToLowerInvariant().Should().NotContainAny(
+                "databaseid",
+                "internalid",
+                "serverid",
+                "dbconnid");
         }
     }
 
@@ -432,23 +428,23 @@ public class SensitiveDataPropertyTests : ApiTestBase
             "cardnumber",
             "cvv",
             "ssn",
-            "socialSecurity",
+            "socialsecurity",
             "driverlicense",
-            "licenseNumber",
+            "licensenumber",
             "bankaccount",
             "routingnumber",
             "connectionstring",
             "server=",
             "database=",
             ".cs:",  // C# file paths
-            "at System.",  // Stack traces
-            "SqlException",
-            "SQLException",
+            "at system.",  // Stack traces
+            "sqlexception",
         };
 
+        var lowerContent = content.ToLowerInvariant();
         foreach (var pattern in sensitivePatterns)
         {
-            content.Should().NotContain(pattern, StringComparison.OrdinalIgnoreCase,
+            lowerContent.Should().NotContain(pattern,
                 $"{contextMessage} should not contain '{pattern}'");
         }
     }

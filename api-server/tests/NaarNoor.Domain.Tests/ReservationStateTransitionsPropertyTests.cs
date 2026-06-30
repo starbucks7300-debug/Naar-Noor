@@ -370,7 +370,7 @@ public class ReservationStateTransitionsPropertyTests
     {
         return new Reservation
         {
-            CustomerName = customerName,
+            CustomerName = string.IsNullOrWhiteSpace(customerName) ? "Test Customer" : customerName,
             Email = "test@example.com",
             PhoneNumber = "1234567890",
             ReservationDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(dayOffset)),

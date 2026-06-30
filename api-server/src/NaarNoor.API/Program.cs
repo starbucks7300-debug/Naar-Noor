@@ -116,3 +116,6 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+// Exposed as public so WebApplicationFactory<Program> can be used in integration tests.
+public partial class Program { }

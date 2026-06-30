@@ -1,6 +1,7 @@
 using FluentAssertions;
 using System.Net;
 using System.Text.Json;
+using NaarNoor.API.Tests.Integration.Fixtures;
 using Xunit;
 
 namespace NaarNoor.API.Tests.Integration;
@@ -58,7 +59,7 @@ public class InjectionAttackPropertyTests : ApiTestBase
         var response = await PostAsync("/api/reservations", command);
 
         // Assert - Should either reject (400) or sanitize (400/200)
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.Created,
+        response.StatusCode.Should().BeOneOf(new[] { HttpStatusCode.BadRequest, HttpStatusCode.Created },
             $"SQL injection payload '{sqlPayload}' should not cause 500 error");
         response.StatusCode.Should().NotBe(HttpStatusCode.InternalServerError,
             "SQL injection should not cause server error");
@@ -125,7 +126,7 @@ public class InjectionAttackPropertyTests : ApiTestBase
         var response = await PostAsync("/api/contact", command);
 
         // Assert - Should accept (sanitized) or reject
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.Created,
+        response.StatusCode.Should().BeOneOf(new[] { HttpStatusCode.BadRequest, HttpStatusCode.Created },
             $"XSS payload '{xssPayload}' should not cause 500 error");
         response.StatusCode.Should().NotBe(HttpStatusCode.InternalServerError,
             "XSS attempt should not cause server error");

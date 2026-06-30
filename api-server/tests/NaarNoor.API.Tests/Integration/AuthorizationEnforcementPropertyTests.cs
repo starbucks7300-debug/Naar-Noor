@@ -2,6 +2,7 @@ using FluentAssertions;
 using NaarNoor.Application.Reservations.Commands.CreateReservation;
 using NaarNoor.Application.Orders.Commands.CreateOrder;
 using System.Net;
+using NaarNoor.API.Tests.Integration.Fixtures;
 using Xunit;
 
 namespace NaarNoor.API.Tests.Integration;
@@ -36,7 +37,7 @@ public class AuthorizationEnforcementPropertyTests : ApiTestBase
         var response = await GetAsync(endpoint);
 
         // Assert
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound,
+        response.StatusCode.Should().BeOneOf(new[] { HttpStatusCode.OK, HttpStatusCode.NotFound },
             $"Public endpoint {endpoint} should not require authentication");
         response.StatusCode.Should().NotBe(HttpStatusCode.Unauthorized,
             "Public endpoints should not return 401");
