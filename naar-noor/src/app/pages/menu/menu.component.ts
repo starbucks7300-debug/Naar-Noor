@@ -211,7 +211,13 @@ export class MenuPageComponent implements OnInit {
   filtersOpen = false;
 
   ngOnInit(): void {
-    this.seo.set({ title: 'Menu' });
+    this.seo.set({
+      title:        'Menu',
+      description:  'Browse the full Naar & Noor menu — flame-grilled Himalayan specialties, traditional momos, Dal Bhat, Lamb Rogan Josh, Sekuwa, and more. Filter by category, dietary preference, or price.',
+      keywords:     'Himalayan menu, momos, Dal Bhat, Lamb Rogan Josh, Sekuwa, Butter Chicken, Himalayan food menu, Nepali dishes, Garlic Naan, vegetarian Himalayan food, vegan Himalayan',
+      canonicalUrl: 'https://www.naarnooor.com/menu',
+      ogUrl:        'https://www.naarnooor.com/menu',
+    });
     this.api.getMenu().subscribe({
       next: (items) => {
         this.allItems = items;

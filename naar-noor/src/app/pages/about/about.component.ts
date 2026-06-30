@@ -92,6 +92,12 @@ export class AboutPageComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.seo.set({ title: 'About' });
+    this.seo.set({
+      title:        'Our Story',
+      description:  'Learn about Naar & Noor — a premium Himalayan dining experience rooted in centuries-old culinary traditions. Meet our chefs and discover the fire, spice, and passion behind every dish.',
+      keywords:     'about Naar Noor, Himalayan restaurant story, Himalayan chefs, Nepali cuisine Guernsey, restaurant philosophy, flame grilled Himalayan food',
+      canonicalUrl: 'https://www.naarnooor.com/about',
+      ogUrl:        'https://www.naarnooor.com/about',
+    });
   }
 }

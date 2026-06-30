@@ -247,7 +247,13 @@ export class ReservationsPageComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.seo.set({ title: 'Reservations' });
+    this.seo.set({
+      title:        'Book a Table',
+      description:  'Reserve a table at Naar & Noor. Choose your chef, pick a date, and secure your Himalayan dining experience. Tables available for lunch and dinner, seven days a week.',
+      keywords:     'book a table Naar Noor, Himalayan restaurant reservation, Guernsey restaurant booking, reserve table Himalayan, dinner reservation Guernsey',
+      canonicalUrl: 'https://www.naarnooor.com/reservations',
+      ogUrl:        'https://www.naarnooor.com/reservations',
+    });
 
     this.form = this.fb.group({
       date:            ['', [Validators.required, this.futureDateValidator]],
