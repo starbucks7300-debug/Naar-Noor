@@ -16,7 +16,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         // Use PostgreSQL connection string for migrations
         // This reads from environment variables or uses a default local connection
         var connectionString = Environment.GetEnvironmentVariable("POSTGRESQL_CONNECTION_STRING")
-            ?? "Host=db.uyzocpvytoljigmcpafn.supabase.co;Port=5432;Database=postgres;User Id=postgres;Password=YOUR_PASSWORD_HERE;";
+            ?? "Host=localhost;Port=5432;Database=postgres;User Id=postgres;Password=;";
 
         optionsBuilder.UseNpgsql(connectionString, npgsql =>
             npgsql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
