@@ -85,7 +85,7 @@ cd Naar-Noor
 Then follow the detailed setup guide:
 
 - 📘 [Detailed installation and setup](GETTING_STARTED.md)
-- 📂 [Project structure](docs/PROJECT_STRUCTURE.md)
+- 📂 [Project structure](docs/STRUCTURE.md)
 - 🏗️ [Architecture](docs/ARCHITECTURE.md)
 
 ### Top-level folders
@@ -100,7 +100,7 @@ Then follow the detailed setup guide:
 |----------|---------|
 | [docs/README.md](docs/README.md) | Documentation index |
 | [GETTING_STARTED.md](GETTING_STARTED.md) | Setup and development guide |
-| [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Codebase layout |
+| [docs/STRUCTURE.md](docs/STRUCTURE.md) | Codebase layout |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design and patterns |
 | [docs/FRONTEND.md](docs/FRONTEND.md) | Frontend development |
 | [docs/BACKEND.md](docs/BACKEND.md) | Backend development |

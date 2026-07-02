@@ -4,7 +4,7 @@ Welcome to the **Naar-Noor** documentation directory. Below is an index of all d
 
 ## 🛠️ General Setup & Development
 *   **[GETTING_STARTED.md](../GETTING_STARTED.md)** (Root) - Local setup and development workflow guide.
-*   **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Codebase structure and layout directory map.
+*   **[STRUCTURE.md](STRUCTURE.md)** - Codebase structure and layout directory map.
 *   **[ARCHITECTURE.md](ARCHITECTURE.md)** - Deep dive into architecture patterns (Clean Architecture, CQRS, and Domain-Driven Design).
 *   **[TESTING.md](TESTING.md)** - Testing guidelines, frameworks, and git hooks integration.
 
@@ -16,8 +16,8 @@ Welcome to the **Naar-Noor** documentation directory. Below is an index of all d
 
 ## 🚀 Deployment & Operations
 *   **[DEPLOYMENT.md](DEPLOYMENT.md)** - Step-by-step instructions for deploying to staging, production, and Docker/Nginx setup.
-*   **[DEPLOYMENT_SECRETS_GUIDE.md](DEPLOYMENT_SECRETS_GUIDE.md)** - Security practices for environment variable secrets.
-*   **[PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md)** - Operators runbook for production deployment, backups, and live logs.
+*   **[SECRETS.md](SECRETS.md)** - Security practices for environment variable secrets.
+*   **[RUNBOOK.md](RUNBOOK.md)** - Operators runbook for production deployment, backups, and live logs.
 *   **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Troubleshooting common errors, Docker issues, and database issues.
 *   **[INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)** - Incident management and emergency contacts.
 
