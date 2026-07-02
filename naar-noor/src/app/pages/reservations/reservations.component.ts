@@ -144,7 +144,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
                       <input
                         type="date"
                         formControlName="date"
-                        class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#C65A1E] focus:outline-none text-sm transition-colors"
+                        class="nn-input"
                       />
                       <div *ngIf="err('date')" data-cy="error-date" class="text-xs text-red-400">
                         <span *ngIf="f['date'].errors?.['required']">Date is required</span>
@@ -158,7 +158,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
                       <input
                         type="time"
                         formControlName="time"
-                        class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#C65A1E] focus:outline-none text-sm transition-colors"
+                        class="nn-input"
                       />
                       <div *ngIf="err('time')" data-cy="error-time" class="text-xs text-red-400">Time is required</div>
                     </div>
@@ -171,7 +171,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
                       type="number"
                       formControlName="guestCount"
                       min="1" max="50"
-                      class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#C65A1E] focus:outline-none text-sm transition-colors"
+                      class="nn-input"
                     />
                     <div *ngIf="err('guestCount')" data-cy="error-guestCount" class="text-xs text-red-400">
                       <span *ngIf="f['guestCount'].errors?.['min']">At least 1 guest required</span>
@@ -189,7 +189,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
                       type="text"
                       formControlName="specialRequests"
                       placeholder="Dietary requirements, celebrations, allergies…"
-                      class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#C65A1E] focus:outline-none text-sm transition-colors placeholder:text-neutral-600"
+                      class="nn-input"
                     />
                   </div>
 
