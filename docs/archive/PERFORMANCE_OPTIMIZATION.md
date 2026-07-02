@@ -469,7 +469,7 @@ psql -U postgres -d naar_noor -c "
 ### Load Testing
 ```bash
 # Run load tests
-k6 run load-test.js --vus 100 --duration 30s
+k6 run scripts/load-test.js --vus 100 --duration 30s
 
 # Output includes:
 # - Response times (p50, p95, p99)
