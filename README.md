@@ -64,12 +64,12 @@ curl http://localhost:8080/health # Should return 200
 ## Key Features
 
 - ✅ **User accounts** - Create account, log in securely
-- ✅ **Reservations** - Book tables, cancel, manage bookings
-- ✅ **Menus** - Browse with images and descriptions
-- ✅ **Reviews** - Read and write reviews with ratings
+- ✅ **Reservations** - Book tables, cancel, select Himalayan chefs, and manage bookings
+- ✅ **Menus** - Browse items dynamically with categorizations, descriptions, and custom same-origin proxy fallback APIs
+- ✅ **Reviews** - Read and write reviews with rating selector stars, feedback validation, and dynamic listing
 - ✅ **Bilingual** - Works in English and Arabic
-- ✅ **Mobile-friendly** - Works on phones and tablets
-- ✅ **Secure** - Passwords encrypted, data protected
+- ✅ **Mobile-friendly** - Works on phones and tablets with customized, unified `nn-input` form styling
+- ✅ **Secure** - Strict Content Security Policy (CSP) allowing only verified scripts, styles, and Iconify endpoints
 - ✅ **Fast** - Optimized for speed (Lighthouse 94/100)
 - ✅ **Accessible** - Designed for everyone (WCAG 2.1 AA)
 
@@ -202,8 +202,14 @@ For comprehensive testing guides, see:
 For hook-specific details, see [naar-noor/.husky/README.md](naar-noor/.husky/README.md).
 
 ## 🚀 Deployment
-
+ 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full deployment instructions.
+
+### Vercel Deployment (Subfolder config)
+To deploy this project in Vercel from a monorepo setup:
+1. Ensure the root `vercel.json` exists with the prefix commands (`npm install --prefix naar-noor` & `npm run build --prefix naar-noor`).
+2. Make sure the output path is set correctly to `naar-noor/dist/naar-noor/browser`.
+3. Vercel will install dependencies in the correct subdirectory, compile Angular, and host the client-side app.
 
 ## 🤝 Contributing
 
