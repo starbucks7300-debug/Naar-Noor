@@ -23,7 +23,7 @@ module.exports = {
   ],
   collectCoverage: true,
   coverageDirectory: '../frontend-coverage',
-  coverageReporters: ['text', 'lcov', 'cobertura', 'json'],
+  coverageReporters: ['text', 'lcov', 'cobertura', 'json', 'json-summary'],
   collectCoverageFrom: [
     'src/app/services/**/*.ts',
     'src/app/components/**/*.ts',

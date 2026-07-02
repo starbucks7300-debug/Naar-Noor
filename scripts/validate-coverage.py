@@ -118,29 +118,70 @@ class CoverageValidator:
         return uncovered_classes
     
     def parse_istanbul_coverage(self, coverage_dir: str) -> Optional[Dict[str, float]]:
-        """Parse Istanbul/Karma coverage report."""
+        """Parse Istanbul/Jest coverage report.
+        
+        Jest generates three coverage files:
+          - coverage-summary.json  → has a 'total' key with aggregated pct values (preferred)
+          - coverage-final.json    → per-file map keyed by absolute file path (NO 'total' key)
+          - cobertura-coverage.xml → Cobertura XML (fallback)
+        """
         try:
-            # Look for coverage.json or cobertura.xml
-            coverage_json = Path(coverage_dir) / 'coverage-final.json'
+            dir_path = Path(coverage_dir)
             
+            # 1st choice: coverage-summary.json — Jest writes {total: {lines: {pct: N}, ...}}
+            summary_json = dir_path / 'coverage-summary.json'
+            if summary_json.exists():
+                with open(summary_json, 'r') as f:
+                    data = json.load(f)
+                    if 'total' in data:
+                        total = data['total']
+                        lines_pct = total.get('lines', {}).get('pct', 0)
+                        stmts_pct = total.get('statements', {}).get('pct', 0)
+                        print(f"[INFO] Parsed coverage-summary.json: lines={lines_pct}%, statements={stmts_pct}%")
+                        return {'lines': lines_pct, 'statements': stmts_pct}
+            
+            # 2nd choice: coverage-final.json — per-file map, compute totals manually
+            coverage_json = dir_path / 'coverage-final.json'
             if coverage_json.exists():
                 with open(coverage_json, 'r') as f:
                     data = json.load(f)
+                
+                # Jest coverage-final.json: keys are file paths, values have s/f/b counts
+                # 'total' key would only exist in coverage-summary.json, not here
+                if 'total' in data:
+                    # Shouldn't normally happen, but handle it anyway
+                    total = data['total']
+                    return {
+                        'lines': total.get('lines', {}).get('pct', 0),
+                        'statements': total.get('statements', {}).get('pct', 0),
+                    }
+                else:
+                    # Compute line coverage from per-file statement counts
+                    total_statements = 0
+                    covered_statements = 0
+                    for file_path, file_data in data.items():
+                        if not isinstance(file_data, dict):
+                            continue
+                        s_map = file_data.get('s', {})
+                        total_statements += len(s_map)
+                        covered_statements += sum(1 for count in s_map.values() if count > 0)
                     
-                    # Extract line coverage from Istanbul format
-                    if 'total' in data:
-                        return {
-                            'lines': data['total'].get('lines', {}).get('pct', 0),
-                            'statements': data['total'].get('statements', {}).get('pct', 0),
-                        }
+                    if total_statements > 0:
+                        pct = round(covered_statements / total_statements * 100.0, 2)
+                        print(f"[INFO] Computed from coverage-final.json: {covered_statements}/{total_statements} statements = {pct}%")
+                        return {'lines': pct, 'statements': pct}
             
-            # Fallback to cobertura XML if present
-            cobertura_file = Path(coverage_dir) / 'cobertura-coverage.xml'
+            # 3rd choice: cobertura XML
+            cobertura_file = dir_path / 'cobertura-coverage.xml'
             if cobertura_file.exists():
                 coverage = self.parse_cobertura_xml(str(cobertura_file))
-                if coverage:
+                if coverage is not None:
+                    print(f"[INFO] Parsed cobertura-coverage.xml: lines={coverage}%")
                     return {'lines': coverage}
             
+            print(f"[WARN] No coverage report found in {coverage_dir} "
+                  "(looked for coverage-summary.json, coverage-final.json, cobertura-coverage.xml)",
+                  file=sys.stderr)
             return None
         except Exception as e:
             print(f"Error parsing Istanbul coverage: {e}", file=sys.stderr)

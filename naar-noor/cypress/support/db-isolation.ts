@@ -6,14 +6,14 @@
  * MODE A — DATABASE_URL is set in Replit Secrets
  *   seedReferenceData() seeds the live database from fixtures, then verifies
  *   every fixture item is present with cy.assertMenuItemSeeded().
- *   Cypress.env('DB_AVAILABLE') is set to true.
+ *   dbAvailable is set to true.
  *   interceptXxx() functions create PASSTHROUGH intercepts — they alias the
  *   request so cy.wait('@alias') still works, but the real API responds.
  *   Tests are fully reproducible against the live backend.
  *
  * MODE B — DATABASE_URL is not set
  *   cy.task() returns { skipped: true }.
- *   Cypress.env('DB_AVAILABLE') is set to false.
+ *   dbAvailable is set to false.
  *   interceptXxx() functions inject a fixture body instead.
  *   cy.assertMenuItemSeeded() logs a skip — no assertion is made.
  *
@@ -23,9 +23,19 @@
  *
  * NOTE: Angular calls http://localhost:8080/api/... (cross-origin from the
  * Cypress baseUrl of localhost:5000), so all intercepts use absolute API URLs.
+ *
+ * NOTE: Cypress.env() is intentionally NOT used here because cypress.config.ts
+ * sets allowCypressEnv: false (Cypress 15 security hardening).
+ * DB availability is tracked via the module-level `dbAvailable` variable instead.
  */
 
 const API = 'http://localhost:8080';
+
+/**
+ * Module-level flag: true when DATABASE_URL is configured and seeding succeeded.
+ * Replaces Cypress.env('DB_AVAILABLE') — safe because allowCypressEnv is false.
+ */
+let dbAvailable = false;
 
 // Names of every item in cypress/fixtures/menu.json.
 // Used after seeding to give DB-level proof that each row was written.
@@ -44,7 +54,7 @@ const FIXTURE_MENU_NAMES = [
  * Call once in the global before() hook (support/e2e.ts).
  *
  * 1. Seeds menu items and chefs from fixtures into the live DB.
- * 2. Records outcome in Cypress.env('DB_AVAILABLE').
+ * 2. Records outcome in the module-level dbAvailable flag.
  * 3. When DB is available, runs cy.assertMenuItemSeeded() for every fixture
  *    item — giving DB-level proof that each row was written, on top of the
  *    UI-level assertions in the individual test files.
@@ -53,7 +63,7 @@ export function seedReferenceData(): void {
   cy.fixture('menu.json').then((items: unknown[]) => {
     cy.task('db:seed:menu', items, { log: false }).then((result) => {
       const r = result as { skipped?: boolean; seeded?: number };
-      Cypress.env('DB_AVAILABLE', !r.skipped);
+      dbAvailable = !r.skipped;
 
       if (r.skipped) {
         cy.log('ℹ️  DB seeding skipped — set DATABASE_URL to enable live-API mode');
@@ -83,7 +93,7 @@ export function seedReferenceData(): void {
  * Passes through to real API when DB is available; uses fixture stub otherwise.
  */
 export function interceptMenu(alias = 'getMenu'): void {
-  if (Cypress.env('DB_AVAILABLE')) {
+  if (dbAvailable) {
     cy.intercept('GET', `${API}/api/menu*`).as(alias);
   } else {
     cy.intercept('GET', `${API}/api/menu*`, { fixture: 'menu.json' }).as(alias);
@@ -95,7 +105,7 @@ export function interceptMenu(alias = 'getMenu'): void {
  * Passes through to real API when DB is available; uses fixture stub otherwise.
  */
 export function interceptChefs(alias = 'getChefs'): void {
-  if (Cypress.env('DB_AVAILABLE')) {
+  if (dbAvailable) {
     cy.intercept('GET', `${API}/api/chefs*`).as(alias);
   } else {
     cy.intercept('GET', `${API}/api/chefs*`, { fixture: 'chefs.json' }).as(alias);
@@ -107,7 +117,7 @@ export function interceptChefs(alias = 'getChefs'): void {
  * Passes through to real API when DB is available; uses fixture stub otherwise.
  */
 export function interceptReviews(alias = 'getReviews'): void {
-  if (Cypress.env('DB_AVAILABLE')) {
+  if (dbAvailable) {
     cy.intercept('GET', `${API}/api/reviews*`).as(alias);
   } else {
     cy.intercept('GET', `${API}/api/reviews*`, { fixture: 'reviews.json' }).as(alias);
@@ -119,7 +129,7 @@ export function interceptReviews(alias = 'getReviews'): void {
  * Passes through to real API when DB is available; stubs 201 otherwise.
  */
 export function interceptReservationCreate(alias = 'createReservation'): void {
-  if (Cypress.env('DB_AVAILABLE')) {
+  if (dbAvailable) {
     cy.intercept('POST', `${API}/api/reservations*`).as(alias);
   } else {
     cy.intercept('POST', `${API}/api/reservations*`, {
