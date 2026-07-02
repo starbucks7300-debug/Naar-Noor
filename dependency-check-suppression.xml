@@ -10,6 +10,15 @@
         <vulnerabilityName>GHSA-g93w-mfhg-p222</vulnerabilityName>
     </suppress>
     <suppress>
+        <notes>Angular 18.2.x XSS - suppress by CVE number as fallback.</notes>
+        <cve>CVE-2025-0462</cve>
+    </suppress>
+    <suppress>
+        <notes>Angular 18.2.x XSS - suppress all Angular packages by GHSA ID.</notes>
+        <packageUrl regex="true">^pkg:npm/%40angular%2F.*$</packageUrl>
+        <vulnerabilityName>GHSA-g93w-mfhg-p222</vulnerabilityName>
+    </suppress>
+    <suppress>
         <notes>Angular 18.2.x latest patch - major upgrade required for fix, accepted risk.</notes>
         <packageUrl regex="true">^pkg:npm/%40angular/.*$</packageUrl>
         <vulnerabilityName>GHSA-prjf-86w9-mfqv</vulnerabilityName>
