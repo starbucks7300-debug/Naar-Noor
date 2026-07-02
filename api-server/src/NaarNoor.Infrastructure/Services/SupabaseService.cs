@@ -207,7 +207,7 @@ public class SupabaseService : ISupabaseService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get user by email {Email}", email);
+            _logger.LogError(ex, "Failed to get user by email at {Timestamp}", DateTime.UtcNow);
             return null;
         }
     }

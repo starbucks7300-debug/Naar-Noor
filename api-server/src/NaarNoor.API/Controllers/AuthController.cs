@@ -51,14 +51,14 @@ public class AuthController : ControllerBase
 
             if (!authResult.Success)
             {
-                _logger.LogWarning("Login failed for {Email}: {Error}", request.Email, authResult.Error);
+                _logger.LogWarning("Login failed for user at {Timestamp}: {Error}", DateTime.UtcNow, authResult.Error);
                 return Unauthorized(new { error = authResult.Error ?? "Invalid credentials" });
             }
 
             var user = authResult.User!;
             var token = _jwtService.GenerateToken(user.Id, user.Email, user.Roles);
 
-            _logger.LogInformation("User {Email} logged in successfully", request.Email);
+            _logger.LogInformation("User logged in successfully at {Timestamp}", DateTime.UtcNow);
 
             return Ok(new
             {
@@ -76,7 +76,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Login failed for user {Email}", request.Email);
+            _logger.LogError(ex, "Login failed at {Timestamp}", DateTime.UtcNow);
             return StatusCode(500, new { error = "Login failed" });
         }
     }
@@ -108,13 +108,13 @@ public class AuthController : ControllerBase
 
             if (!registerResult.Success)
             {
-                _logger.LogWarning("Registration failed for {Email}: {Error}", request.Email, registerResult.Error);
+                _logger.LogWarning("Registration failed at {Timestamp}: {Error}", DateTime.UtcNow, registerResult.Error);
                 return BadRequest(new { error = registerResult.Error ?? "Registration failed" });
             }
 
             var user = registerResult.User!;
             
-            _logger.LogInformation("User {Email} registered successfully", request.Email);
+            _logger.LogInformation("New user registered successfully at {Timestamp}", DateTime.UtcNow);
 
             return Created("", new
             {
@@ -129,7 +129,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Registration failed for {Email}", request.Email);
+            _logger.LogError(ex, "Registration failed at {Timestamp}", DateTime.UtcNow);
             return StatusCode(500, new { error = "Registration failed" });
         }
     }

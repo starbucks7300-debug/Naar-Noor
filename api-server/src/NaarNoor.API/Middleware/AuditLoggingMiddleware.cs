@@ -48,19 +48,38 @@ public static class AuditLoggingMiddleware
 
                 // Extract user ID from claims
                 var userId = context.User?.FindFirst("sub")?.Value ?? "anonymous";
-                
+
+                // Sanitize user-controlled values before logging to prevent log injection
+                var safeUserId = SanitizeForLog(userId);
+                var safePath   = SanitizeForLog(request.Path.Value ?? "");
+                var safeBody   = SanitizeForLog(bodyContent[..Math.Min(500, bodyContent.Length)]);
+
                 // Log audit event
                 logger.LogInformation(
                     "AUDIT: {Method} {Path} by {UserId} at {Timestamp} | Body: {Body}",
                     request.Method,
-                    request.Path,
-                    userId,
+                    safePath,
+                    safeUserId,
                     DateTime.UtcNow,
-                    bodyContent[..Math.Min(500, bodyContent.Length)]  // Truncate to 500 chars
+                    safeBody
                 );
             }
 
             await next();
         });
+    }
+
+    /// <summary>
+    /// Strips newlines and control characters from a user-supplied string
+    /// to prevent log injection attacks.
+    /// </summary>
+    private static string SanitizeForLog(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return string.Empty;
+        // Replace newlines and carriage returns with a safe placeholder
+        return input
+            .Replace("\r", " ")
+            .Replace("\n", " ")
+            .Replace("\t", " ");
     }
 }

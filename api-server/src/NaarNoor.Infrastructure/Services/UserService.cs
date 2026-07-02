@@ -33,7 +33,7 @@ public class UserService : IUserService
             if (!result.Success)
                 return new UserAuthResult { Success = false, Error = result.Error ?? "Authentication failed" };
 
-            _logger.LogInformation("User {Email} authenticated successfully", email);
+            _logger.LogInformation("User authenticated successfully at {Timestamp}", DateTime.UtcNow);
 
             return new UserAuthResult
             {
@@ -51,7 +51,7 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Authentication failed for {Email}", email);
+            _logger.LogError(ex, "Authentication failed at {Timestamp}", DateTime.UtcNow);
             return new UserAuthResult { Success = false, Error = "Authentication failed" };
         }
     }
@@ -77,7 +77,7 @@ public class UserService : IUserService
             if (!result.Success)
                 return new UserAuthResult { Success = false, Error = result.Error ?? "Registration failed" };
 
-            _logger.LogInformation("User {Email} registered successfully", email);
+            _logger.LogInformation("User registered successfully at {Timestamp}", DateTime.UtcNow);
 
             return new UserAuthResult
             {
@@ -95,7 +95,7 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Registration failed for {Email}", email);
+            _logger.LogError(ex, "Registration failed at {Timestamp}", DateTime.UtcNow);
             return new UserAuthResult { Success = false, Error = "Registration failed" };
         }
     }
@@ -145,7 +145,7 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get user by email {Email}", email);
+            _logger.LogError(ex, "Failed to get user by email at {Timestamp}", DateTime.UtcNow);
             return null;
         }
     }
