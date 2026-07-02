@@ -43,6 +43,9 @@ Thumbs.db
 .dockerignore
 docker-compose.override.yml
 
+# Replit (never commit - may contain secrets in [userenv])
+# .replit
+
 # Temporary
 .tmp/
 .cache/

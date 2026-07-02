@@ -1,4 +1,4 @@
-modules = ["dotnet-7.0", "nodejs-20", "web", "python-3.12", "dotnet-8.0"]
+modules = ["nodejs-20", "web", "python-3.12", "dotnet-8.0"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -32,7 +32,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd api-server && dotnet run --project src/NaarNoor.API"
+args = "cd api-server && dotnet run --project src/NaarNoor.API/NaarNoor.API.csproj --urls http://+:8080"
 waitForPort = 8080
 
 [workflows.workflow.metadata]
@@ -72,7 +72,7 @@ externalPort = 8080
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "cd /home/runner/workspace/publish && dotnet NaarNoor.API.dll"]
-build = ["bash", "-c", "cd naar-noor && npm install && npm run build && cd ../api-server && dotnet publish src/NaarNoor.API -c Release -o /home/runner/workspace/publish"]
+build = ["bash", "-c", "cd naar-noor && npm ci --include=dev && npm run build && cd ../api-server && dotnet publish src/NaarNoor.API -c Release -o /home/runner/workspace/publish"]
 
 [userenv]
 

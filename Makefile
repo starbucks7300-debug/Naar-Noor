@@ -113,12 +113,12 @@ build-frontend:
 
 docker-up:
 	@echo "$(GREEN)Starting Docker services...$(NC)"
-	docker-compose up -d
+	docker compose up -d
 	@echo "$(GREEN)Services started!$(NC)"
 
 docker-down:
 	@echo "$(YELLOW)Stopping Docker services...$(NC)"
-	docker-compose down
+	docker compose down
 
 clean:
 	@echo "$(YELLOW)Cleaning build artifacts...$(NC)"
