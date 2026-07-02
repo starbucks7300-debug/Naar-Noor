@@ -45,7 +45,13 @@ LABEL \
     service="naar-noor-api" \
     component="backend" \
     description="Naar & Noor Backend - .NET 8.0 ASP.NET Core" \
-    version="1.0.0"
+    version="1.0.0" \
+    maintainer="Mostafa SAID" \
+    org.opencontainers.image.title="Naar-Noor API" \
+    org.opencontainers.image.url="https://github.com/Mostafa-SAID7/Naar-Noor" \
+    org.opencontainers.image.documentation="https://github.com/Mostafa-SAID7/Naar-Noor/docs" \
+    org.opencontainers.image.vendor="Naar-Noor" \
+    org.opencontainers.image.version="1.0.0"
 
 # Expose port
 EXPOSE 80

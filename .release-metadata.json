@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "releaseDate": "2026-06-01",
+  "status": "stable",
+  "codeName": "Initial Release",
+  "semanticVersion": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "components": {
+    "frontend": {
+      "name": "@workspace/naar-noor",
+      "version": "1.0.0",
+      "framework": "Angular 18.2.14",
+      "language": "TypeScript 5.5.4",
+      "buildTool": "Angular CLI 18.2.21",
+      "packageManager": "npm"
+    },
+    "backend": {
+      "name": "NaarNoor.API",
+      "version": "1.0.0",
+      "framework": "ASP.NET Core 8.0",
+      "language": "C# 13.0",
+      "database": "PostgreSQL (via Supabase)"
+    },
+    "infrastructure": {
+      "docker": "Latest (multi-stage builds)",
+      "kubernetes": "1.20+",
+      "deployment": "Vercel (frontend) + Azure App Service (backend)"
+    }
+  },
+  "supportPolicy": {
+    "type": "SemVer 2.0.0",
+    "current": "1.x - Full support + updates",
+    "security": "Older majors receive security fixes for 6 months only",
+    "eol": "When 2.x is released + 6 months"
+  },
+  "checksums": {
+    "frontend": "See build artifacts",
+    "backend": "See Docker image tags",
+    "database": "See migrations manifest"
+  }
+}

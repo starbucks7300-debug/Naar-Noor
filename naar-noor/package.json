@@ -1,7 +1,24 @@
 {
   "name": "@workspace/naar-noor",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "Naar-Noor - Restaurant Management Platform | Modern full-stack solution for reservations, menus, and reviews",
+  "license": "MIT",
+  "homepage": "https://github.com/Mostafa-SAID7/Naar-Noor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mostafa-SAID7/Naar-Noor.git"
+  },
+  "keywords": [
+    "restaurant",
+    "reservations",
+    "menu-management",
+    "reviews",
+    "angular",
+    "aspnetcore",
+    "full-stack"
+  ],
+  "author": "Mostafa SAID",
   "scripts": {
     "dev": "ng serve --port 5000 --host 0.0.0.0",
     "build": "ng build --configuration production",
