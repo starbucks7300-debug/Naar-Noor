@@ -195,10 +195,10 @@ namespace NaarNoor.Desktop.Common.Services
                 var allItemsResult = await GetMenuItemsAsync();
                 if (!allItemsResult.IsSuccess)
                 {
-                    return Result<List<MenuItemDto>>.Failure(allItemsResult.Error);
+                    return Result<List<MenuItemDto>>.Failure(allItemsResult.Error ?? "Failed to get menu items");
                 }
 
-                var filtered = allItemsResult.Value
+                var filtered = (allItemsResult.Value ?? new List<MenuItemDto>())
                     .Where(item => item.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
@@ -228,10 +228,10 @@ namespace NaarNoor.Desktop.Common.Services
                 var allItemsResult = await GetMenuItemsAsync();
                 if (!allItemsResult.IsSuccess)
                 {
-                    return Result<List<MenuItemDto>>.Failure(allItemsResult.Error);
+                    return Result<List<MenuItemDto>>.Failure(allItemsResult.Error ?? "Failed to get menu items");
                 }
 
-                var available = allItemsResult.Value
+                var available = (allItemsResult.Value ?? new List<MenuItemDto>())
                     .Where(item => item.IsAvailable)
                     .ToList();
 

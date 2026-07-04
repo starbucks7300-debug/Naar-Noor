@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Reactive.Subjects;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using NaarNoor.Desktop.Common.Configuration;
 using NaarNoor.Desktop.Common.Services.Interfaces;
 
@@ -8,13 +10,15 @@ namespace NaarNoor.Desktop.Common.Services
     /// <summary>
     /// Implementation of localization service for multilingual support
     /// Handles runtime culture switching without application restart
+    /// Loads resources from JSON files (Resources/en.json, Resources/ar.json)
+    /// Requirements: REQ-121, REQ-122
     /// </summary>
     public class LocalizationService : ILocalizationService
     {
         private readonly Subject<string> _cultureChanged = new();
         private readonly IConfigurationService _configService;
         private string _currentCulture = "en";
-        private Dictionary<string, Dictionary<string, string>> _resources = new();
+        private Dictionary<string, Dictionary<string, object>> _resources = new();
 
         public string CurrentCulture => _currentCulture;
         public IObservable<string> CultureChanged => _cultureChanged;
@@ -24,9 +28,8 @@ namespace NaarNoor.Desktop.Common.Services
             _configService = configService ?? throw new ArgumentNullException(nameof(configService));
             
             // Initialize with English as default
-            _resources["en"] = new Dictionary<string, string>();
-            _resources["ar"] = new Dictionary<string, string>();
-            LoadDefaultResources();
+            _resources["en"] = new Dictionary<string, object>();
+            _resources["ar"] = new Dictionary<string, object>();
             
             // Load persisted culture preference
             _currentCulture = _configService.Get("Culture", "en") ?? "en";
@@ -34,19 +37,60 @@ namespace NaarNoor.Desktop.Common.Services
         }
 
         /// <summary>
+        /// Flatten a nested dictionary into dot-notation keys
+        /// Example: { "Login": { "Button": "Login" } } => { "Login.Button": "Login" }
+        /// </summary>
+        private void FlattenDictionary(Dictionary<string, object> source, string prefix, Dictionary<string, object> result)
+        {
+            foreach (var kvp in source)
+            {
+                var key = string.IsNullOrEmpty(prefix) ? kvp.Key : $"{prefix}.{kvp.Key}";
+                
+                if (kvp.Value is JsonElement element)
+                {
+                    if (element.ValueKind == JsonValueKind.Object)
+                    {
+                        var nestedDict = JsonSerializer.Deserialize<Dictionary<string, object>>(element.GetRawText()) ?? new();
+                        FlattenDictionary(nestedDict, key, result);
+                    }
+                    else if (element.ValueKind == JsonValueKind.String)
+                    {
+                        result[key] = element.GetString() ?? "";
+                    }
+                    else if (element.ValueKind == JsonValueKind.Number)
+                    {
+                        result[key] = element.GetRawText();
+                    }
+                }
+                else if (kvp.Value is Dictionary<string, object> nested)
+                {
+                    FlattenDictionary(nested, key, result);
+                }
+                else if (kvp.Value != null)
+                {
+                    result[key] = kvp.Value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Get localized string for a given key
+        /// Supports dot notation (e.g., "Login.Button")
         /// </summary>
         public string GetString(string key)
         {
+            if (string.IsNullOrEmpty(key))
+                return key;
+
             if (_resources.TryGetValue(_currentCulture, out var dict) && dict.TryGetValue(key, out var value))
             {
-                return value;
+                return value?.ToString() ?? key;
             }
 
             // Fallback to English
             if (_resources.TryGetValue("en", out var enDict) && enDict.TryGetValue(key, out var enValue))
             {
-                return enValue;
+                return enValue?.ToString() ?? key;
             }
 
             // Return key as fallback
@@ -72,6 +116,7 @@ namespace NaarNoor.Desktop.Common.Services
         /// Set the current culture for the application (runtime switching without restart)
         /// Updates Thread.CurrentThread.CurrentUICulture and persists preference to app-config.json
         /// Triggers CultureChanged event to notify all UI elements to reload strings
+        /// Requirements: REQ-121, REQ-122
         /// </summary>
         public void SetCulture(string cultureName)
         {
@@ -100,9 +145,7 @@ namespace NaarNoor.Desktop.Common.Services
             // Persist culture preference to configuration
             _configService.Set("Culture", cultureName);
 
-            // Note: We don't await here since SetCulture is synchronous.
-            // In a real scenario, you might want to handle persistence errors gracefully.
-            // For now, we'll fire and forget the persistence.
+            // Fire and forget persistence of configuration
             _ = Task.Run(async () =>
             {
                 try
@@ -154,74 +197,67 @@ namespace NaarNoor.Desktop.Common.Services
         }
 
         /// <summary>
-        /// Load all localization resources (no-op for this implementation as resources are loaded in constructor)
+        /// Load all localization resources from JSON files
+        /// Searches for Resources/en.json and Resources/ar.json
+        /// Requirements: REQ-121, REQ-122
         /// </summary>
         public async Task LoadResourcesAsync()
         {
-            // Resources are loaded in the constructor
-            await Task.CompletedTask;
+            try
+            {
+                // Try to load from application data directory first
+                var appDataPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "NaarNoor"
+                );
+
+                // Fallback to current directory or embedded resources
+                var basePath = appDataPath;
+                if (!Directory.Exists(basePath))
+                {
+                    basePath = Path.Combine(AppContext.BaseDirectory, "Resources");
+                }
+
+                await LoadResourcesFromPath("en", basePath);
+                await LoadResourcesFromPath("ar", basePath);
+
+                // If resources weren't loaded, they'll remain as empty dictionaries
+                // This allows the app to continue with fallback to key names
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading localization resources: {ex.Message}");
+                // Continue without throwing - will use key names as fallback
+            }
         }
 
         /// <summary>
-        /// Load default English and Arabic resources
+        /// Load resources for a specific culture from JSON file
         /// </summary>
-        private void LoadDefaultResources()
+        private async Task LoadResourcesFromPath(string culture, string basePath)
         {
-            // English resources
-            _resources["en"]["app.title"] = "Naar-Noor Restaurant Management";
-            _resources["en"]["login.title"] = "Welcome";
-            _resources["en"]["login.username"] = "Username";
-            _resources["en"]["login.password"] = "Password";
-            _resources["en"]["login.button"] = "Login";
-            _resources["en"]["login.error"] = "Invalid credentials";
-            _resources["en"]["dashboard.title"] = "Dashboard";
-            _resources["en"]["menu.title"] = "Menu";
-            _resources["en"]["reservations.title"] = "Reservations";
-            _resources["en"]["staff.title"] = "Staff";
-            _resources["en"]["reports.title"] = "Reports";
-            _resources["en"]["logout"] = "Logout";
-            _resources["en"]["error"] = "Error";
-            _resources["en"]["success"] = "Success";
-            _resources["en"]["confirm"] = "Confirm";
-            _resources["en"]["cancel"] = "Cancel";
-            _resources["en"]["delete"] = "Delete";
-            _resources["en"]["edit"] = "Edit";
-            _resources["en"]["save"] = "Save";
-            _resources["en"]["close"] = "Close";
-            _resources["en"]["ok"] = "OK";
-            _resources["en"]["language"] = "Language";
-            _resources["en"]["english"] = "English";
-            _resources["en"]["arabic"] = "العربية";
-            _resources["en"]["culture.switching"] = "Switching language...";
-            _resources["en"]["culture.switched"] = "Language changed successfully";
+            var filePath = Path.Combine(basePath, $"{culture}.json");
+            
+            if (!File.Exists(filePath))
+            {
+                // Try alternate location
+                filePath = Path.Combine(AppContext.BaseDirectory, "Resources", $"{culture}.json");
+            }
 
-            // Arabic resources
-            _resources["ar"]["app.title"] = "إدارة مطعم نار نور";
-            _resources["ar"]["login.title"] = "أهلا وسهلا";
-            _resources["ar"]["login.username"] = "اسم المستخدم";
-            _resources["ar"]["login.password"] = "كلمة المرور";
-            _resources["ar"]["login.button"] = "تسجيل الدخول";
-            _resources["ar"]["login.error"] = "بيانات اعتماد غير صحيحة";
-            _resources["ar"]["dashboard.title"] = "لوحة التحكم";
-            _resources["ar"]["menu.title"] = "القائمة";
-            _resources["ar"]["reservations.title"] = "الحجوزات";
-            _resources["ar"]["staff.title"] = "الموظفون";
-            _resources["ar"]["reports.title"] = "التقارير";
-            _resources["ar"]["logout"] = "تسجيل الخروج";
-            _resources["ar"]["error"] = "خطأ";
-            _resources["ar"]["success"] = "نجح";
-            _resources["ar"]["confirm"] = "تأكيد";
-            _resources["ar"]["cancel"] = "إلغاء";
-            _resources["ar"]["delete"] = "حذف";
-            _resources["ar"]["edit"] = "تعديل";
-            _resources["ar"]["save"] = "حفظ";
-            _resources["ar"]["close"] = "إغلاق";
-            _resources["ar"]["ok"] = "حسناً";
-            _resources["ar"]["language"] = "اللغة";
-            _resources["ar"]["english"] = "English";
-            _resources["ar"]["arabic"] = "العربية";
-            _resources["ar"]["culture.switching"] = "جاري التبديل إلى اللغة...";
-            _resources["ar"]["culture.switched"] = "تم تغيير اللغة بنجاح";
+            if (File.Exists(filePath))
+            {
+                var json = await File.ReadAllTextAsync(filePath);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var rawResources = JsonSerializer.Deserialize<Dictionary<string, object>>(json, options);
+                
+                if (rawResources != null)
+                {
+                    // Flatten the nested structure to dot notation
+                    var flatResources = new Dictionary<string, object>();
+                    FlattenDictionary(rawResources, "", flatResources);
+                    _resources[culture] = flatResources;
+                }
+            }
         }
     }
 }

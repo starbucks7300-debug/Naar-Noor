@@ -139,7 +139,7 @@ namespace NaarNoor.Desktop.Common.Services
                 if (!revenueResult.IsSuccess || !orderStatsResult.IsSuccess)
                 {
                     return Result<DashboardSummary>.Failure(
-                        revenueResult.IsSuccess ? orderStatsResult.Error : revenueResult.Error);
+                        revenueResult.IsSuccess ? (orderStatsResult.Error ?? "Failed to get order stats") : (revenueResult.Error ?? "Failed to get revenue"));
                 }
 
                 // Get reservation counts
@@ -147,7 +147,7 @@ namespace NaarNoor.Desktop.Common.Services
                 int totalReservations = 0;
                 int activeReservations = 0;
 
-                if (reservationsResult.IsSuccess)
+                if (reservationsResult.IsSuccess && reservationsResult.Value != null)
                 {
                     totalReservations = reservationsResult.Value.Count;
                     activeReservations = reservationsResult.Value
@@ -158,8 +158,8 @@ namespace NaarNoor.Desktop.Common.Services
                 // Build summary
                 var summary = new DashboardSummary
                 {
-                    Revenue = revenueResult.Value,
-                    OrderStats = orderStatsResult.Value,
+                    Revenue = revenueResult.Value!,
+                    OrderStats = orderStatsResult.Value!,
                     TotalReservations = totalReservations,
                     ActiveReservations = activeReservations,
                     GeneratedAt = DateTime.UtcNow

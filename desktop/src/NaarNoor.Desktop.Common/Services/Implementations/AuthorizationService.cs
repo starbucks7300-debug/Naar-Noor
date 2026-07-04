@@ -5,14 +5,17 @@ namespace NaarNoor.Desktop.Common.Services
     /// <summary>
     /// Role-based access control (RBAC) service implementation
     /// Enforces authorization policies based on user roles and permissions
+    /// Logs unauthorized access attempts to audit trail per REQ-005
     /// </summary>
     public class AuthorizationService : IAuthorizationService
     {
         private readonly IAuthenticationService _authService;
+        private readonly IAuditService? _auditService;
 
-        public AuthorizationService(IAuthenticationService authService)
+        public AuthorizationService(IAuthenticationService authService, IAuditService? auditService = null)
         {
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _auditService = auditService;
         }
 
         /// <summary>
@@ -119,7 +122,7 @@ namespace NaarNoor.Desktop.Common.Services
         }
 
         /// <summary>
-        /// Log unauthorized access attempts for audit trail
+        /// Log unauthorized access attempts for audit trail (REQ-005)
         /// </summary>
         private void LogUnauthorizedAttempt(string userId, string feature, string? context)
         {
@@ -129,8 +132,11 @@ namespace NaarNoor.Desktop.Common.Services
                 var logMessage = $"[AUDIT] Unauthorized access attempt - Time: {timestamp}, UserId: {userId}, Feature: {feature}, Context: {context ?? "N/A"}";
                 Debug.WriteLine(logMessage);
                 
-                // TODO: In production, write to audit log service
-                // _auditService.LogSecurityEvent("UnauthorizedAccess", userId, $"Feature: {feature}, Context: {context}");
+                // Log to audit trail asynchronously (fire-and-forget)
+                if (_auditService != null)
+                {
+                    _ = _auditService.LogUnauthorizedAccessAsync(userId, feature, context);
+                }
             }
             catch (Exception ex)
             {

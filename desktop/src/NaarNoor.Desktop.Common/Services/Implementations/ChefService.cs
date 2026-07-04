@@ -81,10 +81,10 @@ namespace NaarNoor.Desktop.Common.Services
                 var staffResult = await GetStaffAsync();
                 if (!staffResult.IsSuccess)
                 {
-                    return Result<List<StaffDto>>.Failure(staffResult.Error);
+                    return Result<List<StaffDto>>.Failure(staffResult.Error ?? "Failed to get staff");
                 }
 
-                var filtered = staffResult.Value
+                var filtered = (staffResult.Value ?? new List<StaffDto>())
                     .Where(s => s.Role.Equals(role, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
@@ -114,10 +114,10 @@ namespace NaarNoor.Desktop.Common.Services
                 var staffResult = await GetStaffAsync();
                 if (!staffResult.IsSuccess)
                 {
-                    return Result<List<StaffDto>>.Failure(staffResult.Error);
+                    return Result<List<StaffDto>>.Failure(staffResult.Error ?? "Failed to get staff");
                 }
 
-                var available = staffResult.Value
+                var available = (staffResult.Value ?? new List<StaffDto>())
                     .Where(s => s.Status.Equals("available", StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
