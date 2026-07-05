@@ -1,5 +1,6 @@
 ﻿using NaarNoor.Desktop.WinForms.ViewModels;
 using NaarNoor.Desktop.WinForms.Utilities;
+using NaarNoor.Desktop.WinForms.Theme;
 
 namespace NaarNoor.Desktop.WinForms.Forms
 {
@@ -23,6 +24,7 @@ namespace NaarNoor.Desktop.WinForms.Forms
         {
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             InitializeComponent();
+            ThemeManager.Apply(this);
             SetupDataBindings();
             SubscribeToEvents();
         }
