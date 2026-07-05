@@ -57,6 +57,10 @@ export class ApiService {
   getPublicImageUrl(bucket: string, path: string | null): string | null {
     if (!path) return null;
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('assets/')) return path;
+    const isPlaceholder = !environment.supabaseUrl
+      || environment.supabaseUrl.includes('your-project')
+      || environment.supabaseUrl.includes('placeholder');
+    if (isPlaceholder) return null;
     return `${environment.supabaseUrl}/storage/v1/object/public/${bucket}/${path}`;
   }
 
