@@ -1,4 +1,4 @@
-import { EmailValidation } from '@types/auth.types';
+import { EmailValidation } from '@/types/auth.types';
 
 /**
  * Validate email format (RFC 5321)

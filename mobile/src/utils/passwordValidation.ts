@@ -1,4 +1,4 @@
-import { PasswordValidation } from '@types/auth.types';
+import { PasswordValidation } from '@/types/auth.types';
 
 /**
  * Validate password complexity

@@ -4,7 +4,7 @@ import { logger } from '@services/logger';
 
 class TokenManager {
   private refreshPromise: Promise<string> | null = null;
-  private refreshTimeout: NodeJS.Timeout | null = null;
+  private refreshTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Get current access token from secure storage

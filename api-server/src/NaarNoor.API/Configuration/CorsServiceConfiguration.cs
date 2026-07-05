@@ -17,21 +17,28 @@ public static class CorsServiceConfiguration
         {
             options.AddDefaultPolicy(policy =>
             {
-                if (environment == "Development")
+                var corsOriginsEnv = Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+                    ?? configuration["CORS:AllowedOrigins"];
+
+                if (!string.IsNullOrWhiteSpace(corsOriginsEnv))
                 {
-                    // Development: Allow localhost for frontend development
-                    policy.WithOrigins("http://localhost:5000", "http://localhost:4200", "http://127.0.0.1:5000")
+                    // Explicit origins configured — use them (supports Replit .replit.app domains)
+                    policy.WithOrigins(corsOriginsEnv.Split(',', StringSplitOptions.RemoveEmptyEntries))
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
                 }
+                else if (environment == "Development")
+                {
+                    // Development fallback: allow any origin so the Replit proxy works
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                }
                 else
                 {
-                    // Production: Restrict to configured origins only
-                    var allowedOrigins = configuration["CORS:AllowedOrigins"]?.Split(',') 
-                        ?? new[] { "https://naar-noor.vercel.app" };
-                    
-                    policy.WithOrigins(allowedOrigins)
+                    // Production fallback
+                    policy.WithOrigins("https://naar-noor.vercel.app")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();

@@ -19,5 +19,4 @@ public class User : BaseEntity
 
     // Navigation properties
     public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
-    public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

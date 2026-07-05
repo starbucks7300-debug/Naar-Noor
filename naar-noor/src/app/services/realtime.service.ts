@@ -14,9 +14,13 @@ export class RealtimeService {
   connect(): void {
     if (this.socket) return;
 
-    const wsUrl = environment.supabaseUrl
-      ? environment.supabaseUrl.replace('https://', 'wss://') + '/realtime/v1/websocket'
-      : '';
+    const isPlaceholder = !environment.supabaseUrl
+      || environment.supabaseUrl.includes('your-project')
+      || environment.supabaseUrl.includes('placeholder');
+
+    if (isPlaceholder) return;
+
+    const wsUrl = environment.supabaseUrl.replace('https://', 'wss://') + '/realtime/v1/websocket';
 
     if (!wsUrl) return;
 

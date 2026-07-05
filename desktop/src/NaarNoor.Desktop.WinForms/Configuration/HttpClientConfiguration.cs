@@ -16,7 +16,7 @@ namespace NaarNoor.Desktop.WinForms.Configuration
         /// </summary>
         public static void ConfigureHttpClients(IServiceCollection services, IConfiguration configuration)
         {
-            var apiBaseUrl = configuration["Api:BaseUrl"] ?? "http://localhost:5000";
+            var apiBaseUrl = configuration["Api:BaseUrl"] ?? "http://localhost:8080";
             var appVersion = GetApplicationVersion();
 
             // Register authentication header handler (must be before HttpClient registration)

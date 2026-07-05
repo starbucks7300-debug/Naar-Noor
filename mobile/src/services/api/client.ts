@@ -4,7 +4,7 @@ import { secureTokenStorage } from '@services/storage/secureTokenStorage';
 import { tokenManager } from './tokenManager';
 import { logger } from '@services/logger';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080/api';
 const API_TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '30000');
 
 export const apiClient: AxiosInstance = axios.create({
