@@ -6,7 +6,7 @@ import {
   RegisterResponse,
   PasswordResetRequest,
   PasswordResetConfirm,
-} from '@types/auth.types';
+} from '@/types/auth.types';
 
 /**
  * User registration

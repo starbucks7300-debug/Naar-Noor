@@ -1,4 +1,4 @@
-import { User, TokenPair } from '@types/auth.types';
+import { User, TokenPair } from '@/types/auth.types';
 
 /**
  * Factory function to generate mock user data for testing

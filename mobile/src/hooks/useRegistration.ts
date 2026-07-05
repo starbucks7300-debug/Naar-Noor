@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { registerUser } from '@services/api/authApi';
 import { useAuthStore } from '@stores/useAuthStore';
-import { RegisterRequest, AuthError } from '@types/auth.types';
+import { RegisterRequest, AuthError } from '@/types/auth.types';
 import { validateEmail } from '@utils/emailValidation';
 import { validatePassword } from '@utils/passwordValidation';
 
