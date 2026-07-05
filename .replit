@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "python-3.12", "dotnet-8.0"]
+modules = ["dotnet-7.0", "nodejs-20", "web", "python-3.12", "dotnet-8.0"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -77,7 +77,10 @@ build = ["bash", "-c", "cd naar-noor && npm ci --include=dev && npm run build &&
 [userenv]
 
 [userenv.shared]
-SUPABASE_URL = "https://your-project.supabase.co"
-SUPABASE_ANON_KEY = "YOUR_ANON_KEY_HERE"
+SUPABASE_URL = "https://placeholder.supabase.co"
+SUPABASE_ANON_KEY = "placeholder-anon-key"
 ASPNETCORE_ENVIRONMENT = "Development"
 PORT = "8080"
+JWT_SECRET_KEY = "7305b9600f379457daa195b8a3842cfd5c4fc6d535aafaad223f71be7cc1ae842617d2ac83cf906c30edd0881152bbbe"
+JWT_ISSUER = "NaarNoor"
+JWT_AUDIENCE = "NaarNoorApp"

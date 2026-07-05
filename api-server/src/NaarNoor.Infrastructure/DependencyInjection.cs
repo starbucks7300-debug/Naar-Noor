@@ -142,13 +142,13 @@ public static class DependencyInjection
         services.AddInMemoryRateLimiting();
         services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-        // Supabase Services - REST API based implementation
+        // Supabase Services - REST API based implementation (optional)
         var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL")
             ?? configuration["Supabase:Url"]
-            ?? throw new InvalidOperationException("Supabase URL not configured");
+            ?? "";
         var supabaseAnonKey = Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY")
             ?? configuration["Supabase:AnonKey"]
-            ?? throw new InvalidOperationException("Supabase Anonymous Key not configured");
+            ?? "";
         
         services.AddHttpClient<ISupabaseAuthService, SupabaseAuthService>();
         services.AddHttpClient<ISupabaseStorageService, SupabaseStorageService>();
@@ -199,7 +199,7 @@ public static class DependencyInjection
         var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
 
         if (!string.IsNullOrWhiteSpace(pgHost) && !string.IsNullOrWhiteSpace(pgUser))
-            return $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SSL Mode=Require;";
+            return $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SSL Mode=Prefer;Trust Server Certificate=true;";
 
         // 2. Explicit full connection string override
         var envConnectionString = Environment.GetEnvironmentVariable("POSTGRESQL_CONNECTION_STRING");
