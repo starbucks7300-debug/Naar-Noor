@@ -53,7 +53,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Return IServiceProvider for application startup
     - _Requirements: infrastructure foundation_
 
-- [ ] 2. Authentication & Security Services
+- [x] 2. Authentication & Security Services
   - [x] 2.1 Implement IAuthenticationService interface and base class
     - Define IAuthenticationService with methods: AuthenticateAsync, RefreshTokenAsync, LogoutAsync, GetCurrentTokenAsync
     - Add properties: IsAuthenticated, CurrentUserId, CurrentUserRole
@@ -86,7 +86,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Add [Headers("Authorization: Bearer")] attributes for protected endpoints
     - _Requirements: REQ-001, REQ-002_
 
-  - [ ] 2.5 Create Refit HTTP client configuration with Polly policies
+  - [x] 2.5 Create Refit HTTP client configuration with Polly policies
     - Configure HttpClient with base URL from appsettings
     - Set timeout to 30 seconds
     - Add retry policy: exponential backoff (1s, 2s, 4s)
@@ -94,7 +94,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Register AuthenticationHeaderHandler for token injection
     - _Requirements: REQ-007, REQ-002_
 
-  - [ ] 2.6 Implement AuthenticationHeaderHandler for automatic token refresh
+  - [x] 2.6 Implement AuthenticationHeaderHandler for automatic token refresh
     - Extend DelegatingHandler to intercept all HTTP requests
     - Add Authorization header with Bearer token if authenticated
     - Detect 401 Unauthorized responses
@@ -111,7 +111,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Test invalid credentials error handling
     - Test network timeout handling
 
-  - [ ] 2.8 Implement role-based access control (RBAC) enforcement
+  - [x] 2.8 Implement role-based access control (RBAC) enforcement
     - Create AuthorizationService to check user roles against operations
     - Implement methods: CanAccessFeature(feature), CanPerformAction(action)
     - Map roles to permissions: Manager → full access, Chef → menu/orders, Staff → reservations/orders
@@ -156,8 +156,8 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Make certificate hash configurable via appsettings
     - _Requirements: REQ-013, REQ-007_
 
-- [ ] 4. Localization & Bilingual Support
-  - [ ] 4.1 Create localization infrastructure and resource files
+- [x] 4. Localization & Bilingual Support
+  - [x] 4.1 Create localization infrastructure and resource files
     - Create ResourceDictionary files: Resources/en.xaml, Resources/ar.xaml
     - Define all UI strings as key-value pairs (200+ strings)
     - Implement ILocalizationService interface
@@ -166,7 +166,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Implement CultureChanged observable for UI bindings
     - _Requirements: REQ-121, REQ-122_
 
-  - [ ] 4.2 Implement runtime culture switching without application restart
+  - [x] 4.2 Implement runtime culture switching without application restart
     - Create SetCulture(cultureName) method in LocalizationService
     - Update Thread.CurrentThread.CurrentUICulture
     - Trigger CultureChanged event to notify UI
@@ -174,7 +174,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Reload all UI strings on culture change
     - _Requirements: REQ-121, REQ-122_
 
-  - [ ] 4.3 Implement RTL/LTR layout support for Arabic
+  - [x] 4.3 Implement RTL/LTR layout support for Arabic
     - Use FlowLayoutPanel for flexible layouts (WinForms)
     - Configure RightToLeft property based on current culture
     - Adjust text alignment (Arabic: right, English: left)
@@ -206,7 +206,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Initialize database on first application run
     - _Requirements: REQ-040, REQ-005_
 
-  - [ ] 5.3 Implement offline mode detection and queuing
+  - [~] 5.3 Implement offline mode detection and queuing
     - Create NetworkConnectivityService to detect network availability
     - Queue write operations when offline in pending_operations table
     - Show "Working Offline" indicator in UI
@@ -214,7 +214,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Store operation metadata: timestamp, user_id, operation details
     - _Requirements: REQ-016_
 
-  - [ ] 5.4 Implement sync queue processing on reconnection
+  - [~] 5.4 Implement sync queue processing on reconnection
     - Create SyncService to process pending operations queue
     - Sort by created_at and execute in order
     - Implement conflict resolution: last-write-wins
@@ -233,7 +233,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Verify reads reflect most recent write
 
 - [ ] 6. Service Layer Implementation
-  - [ ] 6.1 Implement IReservationService with full CRUD operations
+  - [~] 6.1 Implement IReservationService with full CRUD operations
     - Create ReservationService with methods: GetReservationsAsync, GetReservationByIdAsync, CreateReservationAsync, UpdateReservationAsync, DeleteReservationAsync
     - Add IObservable<ReservationNotification> for updates
     - Cache reservations with 30s TTL
@@ -242,7 +242,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Handle errors via Result<T> pattern
     - _Requirements: REQ-061, REQ-065, REQ-066_
 
-  - [ ] 6.2 Implement IMenuService with menu item management
+  - [~] 6.2 Implement IMenuService with menu item management
     - Create MenuService with CRUD methods for menu items
     - Implement caching for full menu list (2-hour TTL)
     - Add filtering by category and availability
@@ -251,7 +251,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Invalidate cache on creation, update, or deletion
     - _Requirements: REQ-041, REQ-042, REQ-043, REQ-044_
 
-  - [ ] 6.3 Implement IChefService for staff management
+  - [~] 6.3 Implement IChefService for staff management
     - Create ChefService for staff/chef operations
     - Implement GetStaffAsync(), UpdateStaffStatusAsync()
     - Support role-based filtering (Chef, Waiter, Manager)
@@ -259,14 +259,14 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Publish staff status changes to observable stream
     - _Requirements: REQ-081, REQ-024_
 
-  - [ ] 6.4 Implement IReportService for analytics
+  - [~] 6.4 Implement IReportService for analytics
     - Create ReportService with methods: GetRevenueAsync(), GetOrderStatsAsync(), GetReservationTrendsAsync()
     - Cache report data with 1-hour TTL (longer for stability)
     - Support date range filtering
     - Return aggregated data structures (no raw queries)
     - _Requirements: REQ-101, REQ-029_
 
-  - [ ] 6.5 Create LocalizationService implementation
+  - [~] 6.5 Create LocalizationService implementation
     - Load resource dictionary based on current culture
     - Implement GetString(key) and GetString(key, args) for i18n
     - Cache loaded resources in memory
@@ -282,7 +282,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Test Result<T> return types
     - Verify cache invalidation after mutations
 
-- [ ] 7. Checkpoint 1 - Service Layer Complete
+- [~] 7. Checkpoint 1 - Service Layer Complete
   - Ensure all service layer tests pass
   - Verify cache strategy works correctly
   - Confirm offline queue functionality
@@ -290,7 +290,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
   - Ask the user if questions arise.
 
 - [ ] 8. MVVM ViewModel Implementation
-  - [ ] 8.1 Create ViewModelBase class with common functionality
+  - [~] 8.1 Create ViewModelBase class with common functionality
     - Extend ObservableObject from CommunityToolkit.Mvvm
     - Add error handling: ErrorMessage, IsLoading properties
     - Implement ExecuteAsync<T> helper for service calls
@@ -299,7 +299,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Support INotifyPropertyChanged via [ObservableProperty] attributes
     - _Requirements: infrastructure foundation_
 
-  - [ ] 8.2 Implement LoginViewModel with authentication logic
+  - [~] 8.2 Implement LoginViewModel with authentication logic
     - Add UsernameInput, PasswordInput observable properties
     - Implement LoginCommand with async logic
     - Validate inputs before submission
@@ -309,7 +309,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Clear sensitive fields on error
     - _Requirements: REQ-001, REQ-002_
 
-  - [ ] 8.3 Implement DashboardViewModel as container/aggregator
+  - [~] 8.3 Implement DashboardViewModel as container/aggregator
     - Add observable properties for dashboard state
     - Load reservation, order, and staff data on initialization
     - Implement auto-refresh every 30 seconds
@@ -318,7 +318,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Implement role-based widget visibility (REQ-027)
     - _Requirements: REQ-021, REQ-026, REQ-027_
 
-  - [ ] 8.4 Implement ReservationViewModel for reservation management
+  - [~] 8.4 Implement ReservationViewModel for reservation management
     - Add SelectedDate, SelectedReservation observable properties
     - Implement LoadReservationsCommand for date-filtered retrieval
     - Implement CreateReservationCommand with form validation
@@ -328,7 +328,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Bind to paginated data grid (50 items per page)
     - _Requirements: REQ-061, REQ-065_
 
-  - [ ] 8.5 Implement MenuViewModel for menu item management
+  - [~] 8.5 Implement MenuViewModel for menu item management
     - Add menu items ObservableCollection property
     - Implement search/filter by category
     - Implement CreateMenuItemCommand with form validation
@@ -338,7 +338,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Show creation/modification timestamps
     - _Requirements: REQ-041, REQ-042, REQ-043, REQ-044_
 
-  - [ ] 8.6 Implement StaffViewModel for staff management
+  - [~] 8.6 Implement StaffViewModel for staff management
     - Add staff list ObservableCollection property
     - Implement UpdateStaffStatusCommand
     - Show role, availability status, scheduled hours
@@ -346,7 +346,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Auto-refresh staff list every 2 minutes
     - _Requirements: REQ-081, REQ-024_
 
-  - [ ] 8.7 Implement ReportViewModel for analytics display
+  - [~] 8.7 Implement ReportViewModel for analytics display
     - Add revenue summary, order stats, reservation trends properties
     - Implement LoadReportCommand with date range filtering
     - Show year-to-date metrics
@@ -362,7 +362,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Mock RelayCommand with Moq
 
 - [ ] 9. UI Layer - Forms Implementation (WinForms)
-  - [ ] 9.1 Implement LoginForm with credential input and validation
+  - [~] 9.1 Implement LoginForm with credential input and validation
     - Create Form with TextBox for username
     - Create MaskedTextBox for password input
     - Implement Login button with enabled/disabled state
@@ -372,7 +372,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Show loading spinner during authentication
     - _Requirements: REQ-001, REQ-014_
 
-  - [ ] 9.2 Implement DashboardForm as main application window
+  - [~] 9.2 Implement DashboardForm as main application window
     - Create main container with menu bar and navigation
     - Implement tab control for feature navigation (Reservations, Menu, Staff, Reports)
     - Add dashboard panel with key metrics widgets
@@ -381,7 +381,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Add culture selector dropdown (EN/AR)
     - _Requirements: REQ-021, REQ-121_
 
-  - [ ] 9.3 Implement ReservationForm with CRUD interface
+  - [~] 9.3 Implement ReservationForm with CRUD interface
     - Create data grid to display reservations (sortable, filterable)
     - Add filter controls: date range picker, status dropdown
     - Implement search textbox for customer name
@@ -391,7 +391,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Implement pagination (10 items per page)
     - _Requirements: REQ-061, REQ-062_
 
-  - [ ] 9.4 Implement MenuForm with bilingual display
+  - [~] 9.4 Implement MenuForm with bilingual display
     - Create data grid for menu items with sorting/filtering
     - Add columns: Name (EN), Name (AR), Category, Price, Availability
     - Implement category filter dropdown
@@ -401,7 +401,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Show item image/description panel (optional)
     - _Requirements: REQ-041, REQ-045_
 
-  - [ ] 9.5 Implement StaffForm for staff status management
+  - [~] 9.5 Implement StaffForm for staff status management
     - Create list view showing staff members
     - Display: Name, Role, Status (color-coded badge)
     - Implement dropdown to change status (available/busy/break)
@@ -410,7 +410,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Color coding: Green (available), Yellow (busy), Red (break)
     - _Requirements: REQ-081, REQ-024_
 
-  - [ ] 9.6 Implement ReportForm for analytics display
+  - [~] 9.6 Implement ReportForm for analytics display
     - Create tabbed interface: Revenue, Orders, Reservations
     - Show key metrics cards (large numeric displays)
     - Add date range picker for filtering
@@ -428,7 +428,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Test culture switching updates UI text
 
 - [ ] 10. Error Handling & Resilience
-  - [ ] 10.1 Implement comprehensive exception handling
+  - [~] 10.1 Implement comprehensive exception handling
     - Create ExceptionHandlingMiddleware for top-level error catching
     - Implement try-catch in all service methods
     - Log detailed errors to application log (not user-visible)
@@ -437,7 +437,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Handle specific exception types (network timeout, API error, validation)
     - _Requirements: REQ-009_
 
-  - [ ] 10.2 Implement retry logic with exponential backoff
+  - [~] 10.2 Implement retry logic with exponential backoff
     - Configure Polly retry policy: 3 attempts, 1s-4s backoff
     - Apply to all transient failures (timeouts, 5xx errors)
     - Skip retries for permanent failures (4xx client errors)
@@ -445,7 +445,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Max retry timeout: 30 seconds total
     - _Requirements: REQ-002, REQ-019_
 
-  - [ ] 10.3 Implement circuit breaker for cascading failure prevention
+  - [~] 10.3 Implement circuit breaker for cascading failure prevention
     - Configure Polly circuit breaker: 5 failures, 30s break duration
     - Detect persistent API unavailability
     - Prevent excessive retry loops
@@ -464,7 +464,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Verify permanent failures are not retried
 
 - [ ] 11. Testing & Validation
-  - [ ] 11.1 Write comprehensive unit tests for authentication flow
+  - [~] 11.1 Write comprehensive unit tests for authentication flow
     - Test successful login with valid credentials
     - Test failed login with invalid credentials
     - Test token refresh on 401 response
@@ -474,7 +474,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Coverage target: >90% for auth service
     - _Requirements: REQ-001, REQ-002, REQ-003_
 
-  - [ ] 11.2 Write unit tests for RBAC and authorization
+  - [~] 11.2 Write unit tests for RBAC and authorization
     - Test role checking: Manager, Chef, Staff, Admin
     - Test permission enforcement: unauthorized access blocked
     - Test claim-based authorization
@@ -491,7 +491,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Test all role combinations
     - Verify unauthorized attempts are logged
 
-  - [ ] 11.4 Write integration tests for API client and services
+  - [~] 11.4 Write integration tests for API client and services
     - Create mock API server (in-process WebApplicationFactory)
     - Test full auth → service → API → response flow
     - Test error scenarios: timeouts, 400/401/500 responses
@@ -509,7 +509,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Test optimistic locking version checking
     - Generate edge cases: exact slot boundaries
 
-  - [ ] 11.6 Write audit trail verification tests
+  - [~] 11.6 Write audit trail verification tests
     - Test all security events logged: login, logout, auth failures
     - Test unauthorized access attempts logged
     - Test sensitive operations logged with payload
@@ -517,7 +517,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Verify audit logs are append-only (immutable)
     - _Requirements: REQ-005_
 
-  - [ ] 11.7 Set up continuous test execution pipeline
+  - [~] 11.7 Set up continuous test execution pipeline
     - Configure xUnit test runner for CI
     - Set coverage threshold: >80% overall
     - Enable parallel test execution
@@ -525,7 +525,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Fail build if coverage drops below threshold
     - _Requirements: infrastructure foundation_
 
-- [ ] 12. Checkpoint 2 - Core Implementation Complete
+- [~] 12. Checkpoint 2 - Core Implementation Complete
   - Ensure all unit tests pass (>80% coverage)
   - Run integration tests with mock API
   - Verify offline mode functionality
@@ -534,7 +534,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
   - Ask the user if questions arise.
 
 - [ ] 13. Security Hardening & Validation
-  - [ ] 13.1 Implement input validation on all user inputs
+  - [~] 13.1 Implement input validation on all user inputs
     - Validate username: alphanumeric + underscore, max 50 chars
     - Validate password: min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special
     - Validate menu item names: max 200 chars, no HTML/script tags
@@ -543,14 +543,14 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Disable submit button while validation errors exist
     - _Requirements: REQ-008_
 
-  - [ ] 13.2 Prevent injection attacks in data access
+  - [~] 13.2 Prevent injection attacks in data access
     - Use parameterized queries exclusively (Refit handles this)
     - Never concatenate user input into SQL or API requests
     - Validate all API payloads before submission
     - Escape HTML in display labels
     - _Requirements: REQ-008_
 
-  - [ ] 13.3 Implement request signing for state-changing operations
+  - [~] 13.3 Implement request signing for state-changing operations
     - Compute HMAC-SHA256 signature of request payload
     - Include timestamp in signature
     - Add X-Request-Signature header to PUT/POST/DELETE
@@ -558,7 +558,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Prevent replay attacks: reject if timestamp >5 minutes old
     - _Requirements: REQ-015_
 
-  - [ ] 13.4 Configure TLS 1.3 enforcement and certificate validation
+  - [~] 13.4 Configure TLS 1.3 enforcement and certificate validation
     - Set HttpClient to require TLS 1.3 minimum
     - Disable TLS 1.2, 1.1, 1.0
     - Enable certificate validation (check root, chain, expiration)
@@ -567,7 +567,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Log certificate validation failures
     - _Requirements: REQ-007, REQ-013_
 
-  - [ ] 13.5 Implement secure logging (no sensitive data)
+  - [~] 13.5 Implement secure logging (no sensitive data)
     - Exclude passwords from all logs
     - Mask JWT tokens: show only first 20 chars
     - Exclude PII from normal logs
@@ -576,7 +576,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Implement log retention: max 30 days detail logs
     - _Requirements: REQ-018_
 
-  - [ ] 13.6 Run security-focused testing and code review
+  - [~] 13.6 Run security-focused testing and code review
     - Manual code review for injection vulnerabilities
     - Test with common attack payloads
     - Verify no hardcoded credentials or secrets
@@ -586,7 +586,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - _Requirements: REQ-020_
 
 - [ ] 14. Documentation & Deployment Setup
-  - [ ] 14.1 Create application README and developer guide
+  - [~] 14.1 Create application README and developer guide
     - Document system requirements: .NET 8+, Windows 10/11
     - Document installation instructions
     - Document how to configure API endpoint (appsettings.json)
@@ -594,7 +594,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Document troubleshooting common issues
     - _Requirements: infrastructure foundation_
 
-  - [ ] 14.2 Set up MSIX packaging for modern distribution
+  - [~] 14.2 Set up MSIX packaging for modern distribution
     - Create MSIX manifest (Package.appxmanifest)
     - Configure application identity and version
     - Set certificate for code signing
@@ -602,7 +602,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Document installation via Microsoft Store or direct deployment
     - _Requirements: REQ-141_
 
-  - [ ] 14.3 Configure CI/CD pipeline for builds and tests
+  - [~] 14.3 Configure CI/CD pipeline for builds and tests
     - Set up GitHub Actions workflow
     - Trigger on PR and push to main
     - Run linting and code analysis
@@ -612,7 +612,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - _Requirements: infrastructure foundation_
 
 - [ ] 15. Final Integration & Checkpoint
-  - [ ] 15.1 Perform end-to-end feature validation
+  - [~] 15.1 Perform end-to-end feature validation
     - Test complete login flow
     - Test dashboard data loading and refresh
     - Test all CRUD operations (reservations, menu, staff)
@@ -621,7 +621,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Test bilingual UI switching (EN ↔ AR)
     - _Requirements: all feature requirements_
 
-  - [ ] 15.2 Run final security audit
+  - [~] 15.2 Run final security audit
     - Verify TLS 1.3 enforcement
     - Verify DPAPI token storage
     - Verify audit logging of all events
@@ -630,7 +630,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - Verify input validation prevents injection
     - _Requirements: REQ-001 through REQ-020_
 
-  - [ ] 15.3 Verify correctness properties with property-based tests
+  - [~] 15.3 Verify correctness properties with property-based tests
     - Run Property 1: Authentication Idempotency (REQ-002)
     - Run Property 2: Cache Coherency (REQ-026, REQ-040)
     - Run Property 3: Reservation Conflict Prevention (REQ-061)
@@ -639,7 +639,7 @@ This implementation plan breaks down the Naar-Noor Desktop Application design in
     - All properties must pass 1000+ test cases each
     - _Requirements: design correctness properties_
 
-  - [ ] 15.4 Final checkpoint - Ensure all tests pass
+  - [~] 15.4 Final checkpoint - Ensure all tests pass
     - Run full test suite: xUnit + property tests
     - Coverage must be >80%
     - All integration tests pass

@@ -2,21 +2,29 @@ using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NaarNoor.Desktop.Common.Services.ApiClients;
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 
 namespace NaarNoor.Desktop.WinForms.Configuration
 {
     /// <summary>
     /// Configures HTTP clients with Refit, security headers, and authentication handlers
-    /// Handles all HttpClient setup for API communication
+    /// Handles all HttpClient setup for API communication with Polly resilience policies
     /// </summary>
     public static class HttpClientConfiguration
     {
+        private const int CircuitBreakerFailureThreshold = 5;
+        private const int CircuitBreakerDurationSeconds = 30;
+
         /// <summary>
         /// Configure HTTP clients with Refit, retry policies, and resilience handlers
+        /// Applies exponential backoff retry policy (1s, 2s, 4s) and circuit breaker policy
         /// </summary>
         public static void ConfigureHttpClients(IServiceCollection services, IConfiguration configuration)
         {
             var apiBaseUrl = configuration["Api:BaseUrl"] ?? "http://localhost:8080";
+            var timeoutSeconds = configuration.GetValue<int>("Api:TimeoutSeconds", 30);
             var appVersion = GetApplicationVersion();
 
             // Register authentication header handler (must be before HttpClient registration)
@@ -26,7 +34,7 @@ namespace NaarNoor.Desktop.WinForms.Configuration
             Action<HttpClient> configureClient = (client) =>
             {
                 client.BaseAddress = new Uri(apiBaseUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
+                client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
 
                 // Add security headers
                 AddSecurityHeaders(client, appVersion);
@@ -35,20 +43,87 @@ namespace NaarNoor.Desktop.WinForms.Configuration
             // Configure TLS 1.3+ enforcement
             ConfigureTls();
 
+            // Create Polly policies
+            var retryPolicy = CreateRetryPolicy();
+            var circuitBreakerPolicy = CreateCircuitBreakerPolicy();
+
             // Register all API clients with HttpClientFactory
-            services.AddHttpClient<IAuthApiClient>(configureClient);
+            services.AddHttpClient<IAuthApiClient>(configureClient)
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy);
 
             services.AddHttpClient<IReservationApiClient>(configureClient)
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy)
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
             services.AddHttpClient<IMenuApiClient>(configureClient)
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy)
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
             services.AddHttpClient<IChefApiClient>(configureClient)
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy)
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
             services.AddHttpClient<IReportApiClient>(configureClient)
+                .AddPolicyHandler(retryPolicy)
+                .AddPolicyHandler(circuitBreakerPolicy)
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+        }
+
+        /// <summary>
+        /// Create Polly retry policy with exponential backoff
+        /// Retries on transient failures: timeouts, 5xx errors
+        /// Backoff delays: 1 second, 2 seconds, 4 seconds
+        /// </summary>
+        private static IAsyncPolicy<HttpResponseMessage> CreateRetryPolicy()
+        {
+            return Policy
+                .Handle<HttpRequestException>()
+                .Or<TaskCanceledException>()
+                .OrResult<HttpResponseMessage>(r =>
+                    (int)r.StatusCode >= 500 ||
+                    r.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+                .WaitAndRetryAsync(
+                    retryCount: 3,
+                    sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt - 1)),
+                    onRetry: (outcome, timespan, retryCount, context) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Polly] Retry {retryCount} after {timespan.TotalSeconds}s - " +
+                            $"Exception: {outcome.Exception?.Message ?? "N/A"}, " +
+                            $"Status: {outcome.Result?.StatusCode.ToString() ?? "N/A"}");
+                    });
+        }
+
+        /// <summary>
+        /// Create Polly circuit breaker policy
+        /// Breaks after 5 consecutive failures with 30-second duration
+        /// Prevents cascading failures to backend API
+        /// </summary>
+        private static IAsyncPolicy<HttpResponseMessage> CreateCircuitBreakerPolicy()
+        {
+            return Policy
+                .Handle<HttpRequestException>()
+                .Or<TaskCanceledException>()
+                .OrResult<HttpResponseMessage>(r =>
+                    (int)r.StatusCode >= 500 ||
+                    r.StatusCode == System.Net.HttpStatusCode.RequestTimeout)
+                .CircuitBreakerAsync(
+                    handledEventsAllowedBeforeBreaking: CircuitBreakerFailureThreshold,
+                    durationOfBreak: TimeSpan.FromSeconds(CircuitBreakerDurationSeconds),
+                    onBreak: (outcome, timespan) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[Polly] Circuit breaker opened for {timespan.TotalSeconds}s - " +
+                            $"After {CircuitBreakerFailureThreshold} failures");
+                    },
+                    onReset: () =>
+                    {
+                        System.Diagnostics.Debug.WriteLine("[Polly] Circuit breaker reset - API recovered");
+                    });
         }
 
         /// <summary>

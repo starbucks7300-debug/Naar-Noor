@@ -38,10 +38,20 @@ namespace NaarNoor.Desktop.WinForms.Configuration
 
             // Register singleton services (stateful, shared across application)
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
+            services.AddSingleton<IAuditService, AuditService>();
             services.AddSingleton<IAuthorizationService, AuthorizationService>();
             services.AddSingleton<ILocalizationService, LocalizationService>();
             services.AddSingleton<ICacheService, CacheService>();
             services.AddSingleton<INetworkConnectivityService, NetworkConnectivityService>();
+
+            // Register security services
+            services.AddSingleton<IInputValidationService, InputValidationService>();
+            services.AddSingleton<ISecureLoggingService, SecureLoggingService>();
+            services.AddSingleton<ITlsConfigurationService, TlsConfigurationService>();
+
+            // Register request signing service with API signing key from configuration
+            var signingKey = configuration["Security:RequestSigningKey"] ?? "DefaultSigningKeyChangeInProduction";
+            services.AddSingleton<IRequestSigningService>(_ => new RequestSigningService(signingKey));
 
             // Register business services as singletons
             services.AddSingleton<IReservationService, ReservationService>();

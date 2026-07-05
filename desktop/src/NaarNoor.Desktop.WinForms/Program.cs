@@ -1,7 +1,9 @@
 using NaarNoor.Desktop.WinForms.Configuration;
 using NaarNoor.Desktop.WinForms.Forms;
 using NaarNoor.Desktop.WinForms.ViewModels;
+using NaarNoor.Desktop.Common.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace NaarNoor.Desktop.WinForms;
@@ -28,6 +30,10 @@ static class Program
 
         // Set up dependency injection
         var serviceProvider = ServiceConfiguration.ConfigureServicesAsync(configuration).Result;
+
+        // Initialize localization service with resource loading (REQ-121, REQ-122)
+        var localizationService = serviceProvider.GetRequiredService<ILocalizationService>();
+        localizationService.LoadResourcesAsync().GetAwaiter().GetResult();
 
         // Create and show login form
         var loginViewModel = serviceProvider.GetService(typeof(LoginViewModel)) as LoginViewModel

@@ -5,16 +5,18 @@ namespace NaarNoor.Desktop.WinForms.Configuration
 {
     /// <summary>
     /// HTTP message handler that automatically injects authentication tokens into outgoing requests
-    /// Handles token refresh on 401 responses and logs refresh failures to audit trail
+    /// Handles token refresh on 401 responses and logs refresh failures to audit trail (REQ-005)
     /// </summary>
     public class AuthenticationHeaderHandler : DelegatingHandler
     {
         private readonly IAuthenticationService _authService;
+        private readonly IAuditService? _auditService;
         private const int MaxRefreshAttempts = 1; // Prevent infinite retry loops
 
-        public AuthenticationHeaderHandler(IAuthenticationService authService)
+        public AuthenticationHeaderHandler(IAuthenticationService authService, IAuditService? auditService = null)
         {
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _auditService = auditService;
         }
 
         /// <summary>
@@ -112,15 +114,26 @@ namespace NaarNoor.Desktop.WinForms.Configuration
         }
 
         /// <summary>
-        /// Log authentication refresh failure for security audit trail
+        /// Log authentication refresh failure for security audit trail (REQ-005)
         /// </summary>
         private void LogRefreshFailure(string? errorMessage)
         {
             try
             {
                 Debug.WriteLine($"[AUDIT] Token refresh failure - User: {_authService.CurrentUserId}, Error: {errorMessage}");
-                // TODO: In production, write to audit log service
-                // _auditService.LogSecurityEvent("TokenRefreshFailed", _authService.CurrentUserId, errorMessage);
+                
+                // Log to audit trail asynchronously (fire-and-forget)
+                if (_auditService != null && !string.IsNullOrEmpty(_authService.CurrentUserId))
+                {
+                    _ = _auditService.LogSecurityEventAsync(
+                        _authService.CurrentUserId,
+                        "token_refresh_failed",
+                        "Authentication",
+                        "failure",
+                        null,
+                        errorMessage
+                    );
+                }
             }
             catch (Exception ex)
             {
