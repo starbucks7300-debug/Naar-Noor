@@ -1,0 +1,163 @@
+name: Build Artifacts
+
+# Build and package artifacts for deployment
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # Build backend release artifact and Docker image
+  build-backend-artifact:
+    name: Build - Backend Release (.NET)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore api-server/NaarNoor.sln
+
+      - name: Build release configuration
+        run: dotnet build api-server/NaarNoor.sln --no-restore --configuration Release
+
+      - name: Publish release build
+        run: dotnet publish api-server/src/NaarNoor.API/NaarNoor.API.csproj --no-build --configuration Release --output ./backend-publish
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-release-build
+          path: ./backend-publish/**/*
+          retention-days: 30
+
+      - name: Lowercase image name
+        id: lowercase
+        run: echo "image_name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}-backend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+
+      - name: Build and push backend Docker image
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api-server
+          file: ./api-server/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}-backend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}-backend:buildcache,mode=max
+
+  # Build frontend release artifact and Docker image
+  build-frontend-artifact:
+    name: Build - Frontend Release (Angular)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: 'naar-noor/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci --include=dev
+        working-directory: naar-noor
+        env:
+          NODE_ENV: development
+
+      - name: Build production bundle
+        run: npm run build
+        working-directory: naar-noor
+
+      - name: Verify bundle size
+        run: |
+          echo "Bundle Analysis:"
+          du -sh naar-noor/dist/** | sort -h
+        continue-on-error: true
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-release-build
+          path: naar-noor/dist/**/*
+          retention-days: 30
+
+      - name: Lowercase image name
+        id: lowercase
+        run: echo "image_name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+
+      - name: Build and push frontend Docker image
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: docker/build-push-action@v6
+        with:
+          context: ./naar-noor
+          file: ./naar-noor/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}-frontend:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.lowercase.outputs.image_name }}-frontend:buildcache,mode=max
