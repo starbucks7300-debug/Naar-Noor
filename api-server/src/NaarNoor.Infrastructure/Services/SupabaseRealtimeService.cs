@@ -105,28 +105,25 @@ public class SupabaseRealtimeService : ISupabaseRealtimeService
         }
     }
 
-    public async Task BroadcastMessageAsync(string channel, string eventName, dynamic payload)
+    public Task BroadcastMessageAsync(string channel, string eventName, dynamic payload)
     {
         try
         {
             _logger.LogInformation("Broadcasting message to channel: {Channel}, event: {EventName}", channel, eventName);
-            
-            // In a real implementation, this would broadcast via the Supabase Realtime API
-            // For now, we log it - clients would typically use the frontend SDK for this
             _logger.LogInformation("Broadcast would be sent to {Channel} with event {EventName}", channel, eventName);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error broadcasting message to channel: {Channel}", channel);
         }
+        return Task.CompletedTask;
     }
 
-    public async Task ReconnectAsync()
+    public Task ReconnectAsync()
     {
         try
         {
             _logger.LogInformation("Reconnecting to Realtime service");
-            // Realtime connections are typically managed by client libraries
             _isConnected = true;
             _logger.LogInformation("Reconnected to Realtime service");
         }
@@ -134,6 +131,7 @@ public class SupabaseRealtimeService : ISupabaseRealtimeService
         {
             _logger.LogError(ex, "Error reconnecting to Realtime service");
         }
+        return Task.CompletedTask;
     }
 
     private async Task SubscribeToChannelAsync(string channel, Func<dynamic, Task> onUpdate, Func<Exception, Task> onError)
