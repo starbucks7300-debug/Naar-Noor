@@ -41,35 +41,46 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
-      - PGHOST=naar-noor-postgres
-      - PGPORT=5432
-      - PGDATABASE=postgres
-      - PGUSER=postgres
-      - PGPASSWORD=${PGPASSWORD:-dev_password_change_me}
-      - SUPABASE_URL=${SUPABASE_URL:-http://localhost:54321}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.625_WdcF3KHqz5amU0x2KfUqKS4FTO2p9PsrqjIjxQA}
+      - POSTGRESQL_CONNECTION_STRING=Host=naar-noor-dev-database;Port=5432;Database=postgres;User Id=postgres;Password=${PGPASSWORD:-dev_password_change_me};SSL Mode=Disable
+      - Supabase__Url=${SUPABASE_URL:-http://localhost:54321}
+      - Supabase__AnonKey=${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.625_WdcF3KHqz5amU0x2KfUqKS4FTO2p9PsrqjIjxQA}
+      - Supabase__ServiceRoleKey=${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSJ9.DaYlG6CDqKs0V8Z-LTUItzjhck01OMc3IrapzP-kiGI}
     ports:
       - "8080:80"
       - "7000:7000"  # Debug port
+    depends_on:
+      naar-noor-dev-database:
+        condition: service_healthy
     command: dotnet watch run --project src/NaarNoor.API
+    networks:
+      - naar-noor-dev-network
     labels:
       com.naar-noor.service: "api"
       com.naar-noor.environment: "development"
       com.naar-noor.description: "Backend API server (hot reload)"
 
   naar-noor-dev-database:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: postgres:16-alpine
     container_name: naar-noor-dev-database
     hostname: naar-noor-dev-database
     environment:
-      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-YourPassword123!}
-      - ACCEPT_EULA=Y
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${PGPASSWORD:-dev_password_change_me}
+      - POSTGRES_DB=postgres
     ports:
-      - "1433:1433"
+      - "5432:5432"
+    volumes:
+      - naar-noor-dev-database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     labels:
       com.naar-noor.service: "database"
       com.naar-noor.environment: "development"
-      com.naar-noor.description: "SQL Server database (development)"
+      com.naar-noor.description: "PostgreSQL database (development)"
 
   # Adminer - Database management UI for development
   naar-noor-dev-adminer:
@@ -84,12 +95,10 @@ services:
     networks:
       - naar-noor-dev-network
     restart: unless-stopped
-    environment:
-      - ADMINER_DEFAULT_SERVER=naar-noor-dev-database
     labels:
       com.naar-noor.service: "adminer"
       com.naar-noor.environment: "development"
-      com.naar-noor.description: "Database management UI"
+      com.naar-noor.description: "Database management UI (PostgreSQL)"
 
 networks:
   naar-noor-dev-network:
@@ -103,9 +112,4 @@ volumes:
     driver: local
     labels:
       com.naar-noor.volume: "database-data"
-      com.naar-noor.environment: "development"
-  naar-noor-dev-database-log:
-    driver: local
-    labels:
-      com.naar-noor.volume: "database-log"
       com.naar-noor.environment: "development"

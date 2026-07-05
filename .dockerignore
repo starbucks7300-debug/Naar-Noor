@@ -1,0 +1,73 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules/
+.NET/
+packages/
+bin/
+obj/
+
+# Build outputs
+dist/
+build/
+publish/
+
+# Tests & coverage
+coverage/
+test-results/
+*.log
+logs/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-*
+.vs/
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary
+.tmp/
+.cache/
+*.tmp
+
+# CI/CD
+.github/workflows/logs/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Application specific
+node_modules/
+*.pem
+*.key
+secrets.json
+appsettings.*.json
+terraform.tfvars
+.terraform/
+
+# Mobile & Desktop (not containerized)
+mobile/
+desktop/
+k8s/
+
+# Kubernetes
+k8s/
+
+# Documentation
+docs/
+README.md
+*.md
