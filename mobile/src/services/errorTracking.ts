@@ -106,7 +106,8 @@ class ErrorTracker {
    * Capture a message
    */
   captureMessage(message: string, level: 'fatal' | 'error' | 'warning' | 'info' | 'debug' = 'info'): void {
-    logger[level === 'warning' ? 'warn' : level](message);
+    const logLevel = level === 'warning' ? 'warn' : level === 'fatal' ? 'error' : level;
+    logger[logLevel](message);
 
     // In production, send to Sentry
     // if (typeof Sentry !== 'undefined' && Sentry.captureMessage) {

@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
-import { useUserStore } from '@stores/useAuthStore';
+import { useAuthStore } from '@stores/useAuthStore';
 
 export default function AppLayout() {
-  const { user } = useUserStore();
+  const { user } = useAuthStore();
   const isStaff = user?.role !== 'customer';
 
   if (isStaff) {
@@ -35,7 +35,6 @@ export default function AppLayout() {
     );
   }
 
-  // Customer app
   return (
     <Tabs
       screenOptions={{

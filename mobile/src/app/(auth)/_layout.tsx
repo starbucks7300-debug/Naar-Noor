@@ -5,8 +5,8 @@ export default function AuthLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animationEnabled: true,
-        animationTypeForReplace: true,
+        animation: 'slide_from_right',
+        animationTypeForReplace: 'push',
       }}
     >
       <Stack.Screen name="login" />

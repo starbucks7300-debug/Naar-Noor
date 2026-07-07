@@ -13,12 +13,11 @@ export default function RootLayout() {
   const { language } = useUIStore();
 
   useEffect(() => {
-    // Set language on app initialization
     i18n.changeLanguage(language);
   }, [language]);
 
   if (isLoading) {
-    return null; // Show splash screen
+    return null;
   }
 
   return (
@@ -28,7 +27,7 @@ export default function RootLayout() {
           name="(app)"
           options={{
             headerShown: false,
-            animationEnabled: false,
+            animation: 'none',
           }}
         />
       ) : (
@@ -36,7 +35,7 @@ export default function RootLayout() {
           name="(auth)"
           options={{
             headerShown: false,
-            animationEnabled: false,
+            animation: 'none',
           }}
         />
       )}

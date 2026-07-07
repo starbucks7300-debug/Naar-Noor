@@ -74,11 +74,12 @@ class TokenManager {
         throw new Error('No refresh token available');
       }
 
-      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080/api';
       const response = await fetch(`${apiUrl}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}`,
         },
         body: JSON.stringify({ refreshToken }),
       });
@@ -93,7 +94,7 @@ class TokenManager {
       }
 
       const data = await response.json();
-      const newAccessToken = data.accessToken;
+      const newAccessToken = data.accessToken || data.token;
       const newRefreshToken = data.refreshToken || refreshToken;
       const expiresIn = data.expiresIn;
 
