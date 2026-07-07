@@ -1,45 +1,34 @@
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using NaarNoor.Application.Common.Interfaces;
+using NaarNoor.Domain.Entities;
 using NaarNoor.Domain.Enums;
 
 namespace NaarNoor.Application.MenuItems.Queries.GetMenuItems;
 
-public class GetMenuItemsQueryHandler : IRequestHandler<GetMenuItemsQuery, List<MenuItemDto>>
+/// <summary>
+/// Centralized EF projection from MenuItem entity → MenuItemDto.
+/// Used by all menu item query handlers to avoid duplicating Select(...) expressions.
+/// </summary>
+internal static class MenuItemProjection
 {
-    private readonly IUnitOfWork _unitOfWork;
+    internal static IQueryable<MenuItemDto> ProjectToDto(this IQueryable<MenuItem> source)
+        => source.Select(m => new MenuItemDto(
+            m.Id,
+            m.Name,
+            m.Description,
+            m.Price,
+            m.Category.ToString(),
+            m.IsVegetarian,
+            m.IsVegan,
+            m.IsGlutenFree,
+            m.IsAvailable,
+            m.ImageUrl,
+            m.SortOrder));
 
-    public GetMenuItemsQueryHandler(IUnitOfWork unitOfWork)
+    internal static IQueryable<MenuItem> FilterByCategory(
+        this IQueryable<MenuItem> source, string? category)
     {
-        _unitOfWork = unitOfWork;
-    }
-
-    public async Task<List<MenuItemDto>> Handle(GetMenuItemsQuery request, CancellationToken cancellationToken)
-    {
-        var query = _unitOfWork.MenuItems.Query().Where(m => m.IsAvailable);
-
-        if (!string.IsNullOrWhiteSpace(request.Category) &&
-            Enum.TryParse<MenuCategory>(request.Category, true, out var category))
-        {
-            query = query.Where(m => m.Category == category);
-        }
-
-        return await query
-            .OrderBy(m => m.Category)
-            .ThenBy(m => m.SortOrder)
-            .Select(m => new MenuItemDto(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.Price,
-                m.Category.ToString(),
-                m.IsVegetarian,
-                m.IsVegan,
-                m.IsGlutenFree,
-                m.IsAvailable,
-                m.ImageUrl,
-                m.SortOrder
-            ))
-            .ToListAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(category)) return source;
+        return Enum.TryParse<MenuCategory>(category, ignoreCase: true, out var cat)
+            ? source.Where(m => m.Category == cat)
+            : source;
     }
 }

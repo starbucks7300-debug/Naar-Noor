@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using NaarNoor.Application.Common.Interfaces;
 using NaarNoor.Infrastructure.Data;
@@ -16,6 +17,11 @@ public class Repository<TEntity> : IRepository<TEntity>
 
     public IQueryable<TEntity> Query()
         => _context.Set<TEntity>();
+
+    public Task<TEntity?> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default)
+        => _context.Set<TEntity>().FirstOrDefaultAsync(predicate, cancellationToken);
 
     public void Add(TEntity entity)
         => _context.Set<TEntity>().Add(entity);
