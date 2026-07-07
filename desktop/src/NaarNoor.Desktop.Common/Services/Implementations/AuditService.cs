@@ -1,26 +1,27 @@
-using NaarNoor.Desktop.Common.Data;
-using NaarNoor.Desktop.Common.Data.Models;
-using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace NaarNoor.Desktop.Common.Services
 {
     /// <summary>
-    /// Service for logging security events and sensitive operations to the audit trail
-    /// Implements requirements REQ-005 for audit logging and compliance tracking
+    /// Logs security events to a local append-only JSONL file.
+    /// No local database — all business data lives in the centralized API server.
     /// </summary>
     public class AuditService : IAuditService
     {
-        private readonly DatabaseContext _dbContext;
+        private readonly string _logFilePath;
+        private readonly SemaphoreSlim _writeLock = new(1, 1);
 
-        public AuditService(DatabaseContext dbContext)
+        public AuditService()
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            var logDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "NaarNoor", "logs");
+
+            Directory.CreateDirectory(logDirectory);
+            _logFilePath = Path.Combine(logDirectory, "audit.jsonl");
         }
 
-        /// <summary>
-        /// Log a security event to the audit trail
-        /// </summary>
         public async Task LogSecurityEventAsync(
             string userId,
             string action,
@@ -29,169 +30,90 @@ namespace NaarNoor.Desktop.Common.Services
             string? resourceId = null,
             string? details = null)
         {
-            try
+            var entry = new AuditLogEntry
             {
-                var auditLog = new AuditLog
-                {
-                    Timestamp = DateTime.UtcNow,
-                    UserId = userId ?? "unknown",
-                    Action = action,
-                    ResourceType = resourceType,
-                    ResourceId = resourceId,
-                    Status = status,
-                    Details = details
-                };
+                Id           = Environment.TickCount,
+                Timestamp    = DateTime.UtcNow,
+                UserId       = userId ?? "unknown",
+                Action       = action,
+                ResourceType = resourceType,
+                ResourceId   = resourceId,
+                Status       = status,
+                Details      = details,
+            };
 
-                _dbContext.AuditLogs.Add(auditLog);
-                await _dbContext.SaveChangesAsync();
-
-                Debug.WriteLine($"[AUDIT] Logged event: Action={action}, UserId={userId}, Status={status}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ERROR] Failed to log security event: {ex.Message}");
-                // Don't throw - logging failures should not crash the application
-            }
+            await AppendEntryAsync(entry);
+            Debug.WriteLine($"[AUDIT] {action} | user={userId} | resource={resourceType} | status={status}");
         }
 
-        /// <summary>
-        /// Log an unauthorized access attempt to the audit trail
-        /// </summary>
-        public async Task LogUnauthorizedAccessAsync(string userId, string feature, string? details = null)
-        {
-            try
-            {
-                var fullDetails = $"Unauthorized access attempt to feature: {feature}";
-                if (!string.IsNullOrEmpty(details))
-                {
-                    fullDetails += $". Context: {details}";
-                }
+        public Task LogUnauthorizedAccessAsync(string userId, string feature, string? details = null)
+            => LogSecurityEventAsync(userId, "unauthorized_access", "Feature", "failure", feature,
+                $"Unauthorized access to: {feature}" + (details is null ? "" : $". {details}"));
 
-                await LogSecurityEventAsync(
-                    userId,
-                    "unauthorized_access",
-                    "Feature",
-                    "failure",
-                    feature,
-                    fullDetails
-                );
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ERROR] Failed to log unauthorized access: {ex.Message}");
-            }
-        }
+        public Task LogLoginAsync(string userId, bool success, string? details = null)
+            => LogSecurityEventAsync(userId, "login", "Authentication",
+                success ? "success" : "failure", userId, details);
 
-        /// <summary>
-        /// Log a login event
-        /// </summary>
-        public async Task LogLoginAsync(string userId, bool success, string? details = null)
-        {
-            try
-            {
-                var status = success ? "success" : "failure";
-                await LogSecurityEventAsync(
-                    userId,
-                    "login",
-                    "Authentication",
-                    status,
-                    userId,
-                    details
-                );
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ERROR] Failed to log login event: {ex.Message}");
-            }
-        }
+        public Task LogLogoutAsync(string userId)
+            => LogSecurityEventAsync(userId, "logout", "Authentication", "success", userId);
 
-        /// <summary>
-        /// Log a logout event
-        /// </summary>
-        public async Task LogLogoutAsync(string userId)
-        {
-            try
-            {
-                await LogSecurityEventAsync(
-                    userId,
-                    "logout",
-                    "Authentication",
-                    "success",
-                    userId
-                );
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[ERROR] Failed to log logout event: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Get audit logs for a specific user
-        /// </summary>
         public async Task<IReadOnlyList<AuditLogEntry>> GetUserAuditLogsAsync(string userId, int days = 90)
         {
+            var cutoff = DateTime.UtcNow.AddDays(-days);
+            return await ReadEntriesAsync(e => e.UserId == userId && e.Timestamp >= cutoff);
+        }
+
+        public async Task<IReadOnlyList<AuditLogEntry>> GetUnauthorizedAccessAttemptsAsync(int days = 30)
+        {
+            var cutoff = DateTime.UtcNow.AddDays(-days);
+            return await ReadEntriesAsync(e => e.Action == "unauthorized_access" && e.Timestamp >= cutoff);
+        }
+
+        private async Task AppendEntryAsync(AuditLogEntry entry)
+        {
+            await _writeLock.WaitAsync();
             try
             {
-                var cutoffDate = DateTime.UtcNow.AddDays(-days);
-
-                var logs = await _dbContext.AuditLogs
-                    .Where(a => a.UserId == userId && a.Timestamp >= cutoffDate)
-                    .OrderByDescending(a => a.Timestamp)
-                    .Select(a => new AuditLogEntry
-                    {
-                        Id = a.Id,
-                        Timestamp = a.Timestamp,
-                        UserId = a.UserId,
-                        Action = a.Action,
-                        ResourceType = a.ResourceType,
-                        ResourceId = a.ResourceId,
-                        Status = a.Status,
-                        Details = a.Details
-                    })
-                    .ToListAsync();
-
-                return logs;
+                var line = JsonSerializer.Serialize(entry) + Environment.NewLine;
+                await File.AppendAllTextAsync(_logFilePath, line);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ERROR] Failed to retrieve user audit logs: {ex.Message}");
-                return Array.Empty<AuditLogEntry>();
+                Debug.WriteLine($"[AUDIT] Write failed: {ex.Message}");
+            }
+            finally
+            {
+                _writeLock.Release();
             }
         }
 
-        /// <summary>
-        /// Get all unauthorized access attempts
-        /// </summary>
-        public async Task<IReadOnlyList<AuditLogEntry>> GetUnauthorizedAccessAttemptsAsync(int days = 30)
+        private async Task<IReadOnlyList<AuditLogEntry>> ReadEntriesAsync(Func<AuditLogEntry, bool> predicate)
         {
+            var results = new List<AuditLogEntry>();
             try
             {
-                var cutoffDate = DateTime.UtcNow.AddDays(-days);
+                if (!File.Exists(_logFilePath)) return results;
 
-                var logs = await _dbContext.AuditLogs
-                    .Where(a => a.Action == "unauthorized_access" && a.Timestamp >= cutoffDate)
-                    .OrderByDescending(a => a.Timestamp)
-                    .Select(a => new AuditLogEntry
+                var lines = await File.ReadAllLinesAsync(_logFilePath);
+                foreach (var line in lines)
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    try
                     {
-                        Id = a.Id,
-                        Timestamp = a.Timestamp,
-                        UserId = a.UserId,
-                        Action = a.Action,
-                        ResourceType = a.ResourceType,
-                        ResourceId = a.ResourceId,
-                        Status = a.Status,
-                        Details = a.Details
-                    })
-                    .ToListAsync();
+                        var entry = JsonSerializer.Deserialize<AuditLogEntry>(line);
+                        if (entry is not null && predicate(entry))
+                            results.Add(entry);
+                    }
+                    catch { /* skip malformed lines */ }
+                }
 
-                return logs;
+                results.Sort((a, b) => b.Timestamp.CompareTo(a.Timestamp));
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ERROR] Failed to retrieve unauthorized access attempts: {ex.Message}");
-                return Array.Empty<AuditLogEntry>();
+                Debug.WriteLine($"[AUDIT] Read failed: {ex.Message}");
             }
+            return results;
         }
     }
 }
